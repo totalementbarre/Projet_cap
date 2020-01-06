@@ -147,7 +147,7 @@ public class ImageProcessing {
 
         int nb_lignes = m.rows();
         int nb_cols   = m.cols();
-        ;
+
         for (int i = 0; i < nb_lignes; i++) {
             for (int j = 0; j < nb_cols; j++) {
                 double temp[] = m.get(i,j);
@@ -162,18 +162,16 @@ public class ImageProcessing {
     }
 
 
-    static Mat applyPrewittH(Mat image) {
-        Mat image_converted = new Mat();
-        image.convertTo(image_converted,CV_32F);
-        Mat img_prewittH = new Mat(image.rows(), image.cols(), CV_32F);
+    static void applyPrewittH(Mat image,Mat img_prewittH) {
+
         int nb_lignes = image.rows();
         int nb_cols   = image.cols();
         ;
         for (int i = 1; i < nb_lignes-1; i++) {
             for (int j = 1; j < nb_cols-1; j++) {
-                double temp[] = image_converted.get(i,j-1);
+                double temp[] = image.get(i,j-1);
                 double p = temp[0] * -1;
-                double temp2[] = image_converted.get(i,j);
+                double temp2[] = image.get(i,j);
                 p += temp2[0]*1;
                 img_prewittH.put(i,j,p);
             }
@@ -182,21 +180,19 @@ public class ImageProcessing {
 
 
 
-        return img_prewittH;
     }
 
-    static Mat applyPrewittV(Mat image) {
-        Mat image_converted = new Mat();
-        image.convertTo(image_converted,CV_32F);
-        Mat img_prewittH = new Mat(image.rows(), image.cols(), CV_32F);
+    static void applyPrewittV(Mat image,Mat img_prewittH) {
+
+        //Mat img_prewittH = new Mat(image.rows(), image.cols(), CV_32F);
         int nb_lignes = image.rows();
         int nb_cols   = image.cols();
         ;
         for (int i = 1; i < nb_lignes-1; i++) {
             for (int j = 1; j < nb_cols-1; j++) {
-                double temp[] = image_converted.get(i-1,j);
+                double temp[] = image.get(i-1,j);
                 double p = temp[0] * -1;
-                double temp2[] = image_converted.get(i,j);
+                double temp2[] = image.get(i,j);
                 p += temp2[0]*1;
                 img_prewittH.put(i,j,p);
             }
@@ -205,12 +201,11 @@ public class ImageProcessing {
 
 
 
-        return img_prewittH;
     }
 
 
-    static Mat NormeGradient(Mat a, Mat b){
-        Mat normeGr = new Mat(a.rows(), b.cols(), CV_32F);
+    static void NormeGradient(Mat a, Mat b,Mat normeGr){
+
 
         int nb_lignes = a.rows();
         int nb_cols   = b.cols();
@@ -223,9 +218,24 @@ public class ImageProcessing {
             }
 
         }
-    return normeGr;
     }
 
+    static Mat DownsizeResolution(Mat m,int factor){
+        int nb_lignes = m.rows()/factor;
+        int nb_cols   = m.cols()/factor;
+
+        Mat out = new Mat(nb_lignes, nb_cols, CV_8UC1);
+
+
+        for (int i = 0; i < nb_lignes; i++) {
+            for (int j = 0; j < nb_cols; j++) {
+                double temp[] = m.get(i*factor,j*factor);
+                out.put(i,j,temp[0]);
+            }
+
+        }
+    return out;
+    }
     static Mat Convolution(Mat m, Mat mask) {
         return m;
     }
