@@ -44,14 +44,14 @@ public class ImageProcessing {
 
 
 
-        //ImageProcessing.applyPrewittH(cameraMat_GREY, img_prewittH);
-        //ImageProcessing.applyPrewittV(cameraMat_GREY,img_prewittV);
-        //ImageProcessing.NormeGradient(img_prewittH,img_prewittV,normeGr);
+        ImageProcessing.applyPrewittH(cameraMat_GREY, img_prewittH);
+        ImageProcessing.applyPrewittV(cameraMat_GREY,img_prewittV);
+        ImageProcessing.NormeGradient(img_prewittH,img_prewittV,normeGr);
 
-        Mat test = ImageProcessing.MatToMatCV_8C1(cameraMat_GREY);  //TODO super long , a optimiser
+        Mat test = ImageProcessing.MatToMatCV_8C1(normeGr);  //TODO super long , a optimiser
         //Mat prewittH_converted = ImageProcessing.MatToMatCV_8C1(test);
         BufferedImage test2 = ImageProcessing.MatToBufferedImage(test);
-        return sourceImg;
+        return test2;
     }
 
 

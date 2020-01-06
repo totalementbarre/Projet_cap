@@ -1,11 +1,6 @@
-import org.opencv.core.Mat;
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.image.BufferedImage;
-
-import static org.opencv.core.CvType.*;
 
 public class CustomFrame extends JFrame {
     private JPanel contentPane;
@@ -41,7 +36,7 @@ public class CustomFrame extends JFrame {
             for (; ; ) {
                 repaint();
                 try {
-                    Thread.sleep(30);
+                    Thread.sleep(10);
                 } catch (InterruptedException e) {
                 }
             }
