@@ -5,6 +5,9 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
+import static org.opencv.core.CvType.CV_8UC1;
+import static org.opencv.core.CvType.CV_8UC3;
+
 public class CustomFrame extends JFrame {
     private JPanel contentPane;
 
@@ -25,9 +28,18 @@ public class CustomFrame extends JFrame {
         g = contentPane.getGraphics();
         BufferedImage img =videoCap.getOneFrame();
         //img = ImageProcessing.applyPrewittH(img);
+        Mat cameraMat = ImageProcessing.BufferedImageToMat(img);
         BufferedImage template = ImageProcessing.PatternImage();
-        Mat test = ImageProcessing.BufferedImageToMat(img);
-        BufferedImage test2 = ImageProcessing.MatToBufferedImage(test);
+        Mat img_mat_RGB = ImageProcessing.BufferedImageToMat(template);
+        Mat img_mat_GREY = ImageProcessing.MatRGBToGrey(img_mat_RGB);
+
+        Mat prewittH = ImageProcessing.applyPrewittV(cameraMat);
+        Mat prewittV = ImageProcessing.applyPrewittV(cameraMat);
+        Mat normeGr = ImageProcessing.NormeGradient(prewittH,prewittV);
+
+        Mat test = ImageProcessing.MatToMatCV_8C1(normeGr);
+        Mat prewittH_converted = ImageProcessing.MatToMatCV_8C1(test);
+        BufferedImage test2 = ImageProcessing.MatToBufferedImage(prewittH_converted);
 
 
         g.drawImage(test2, 0, 0, this);
