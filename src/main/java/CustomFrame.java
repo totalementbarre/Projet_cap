@@ -5,19 +5,6 @@ import java.awt.*;
 public class CustomFrame extends JFrame {
     private JPanel contentPane;
 
-    public static void main(String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    CustomFrame frame = new CustomFrame();
-                    frame.setVisible(true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
-
     public CustomFrame() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(0, 0, 1280, 720);
