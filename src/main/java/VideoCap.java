@@ -1,3 +1,4 @@
+import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 
 import java.awt.image.BufferedImage;
@@ -17,6 +18,7 @@ public class VideoCap {
     VideoCap() {
         cap = new VideoCapture();
         cap.open(0);
+
         cap.set(CV_CAP_PROP_FRAME_WIDTH,1280); //to get the actual width of the camera
         cap.set(CV_CAP_PROP_FRAME_HEIGHT,720);//to get the actual height of the camera
     }
