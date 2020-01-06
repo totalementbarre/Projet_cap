@@ -15,6 +15,48 @@ import static org.opencv.core.CvType.CV_32F;
 import static org.opencv.core.CvType.CV_8UC1;
 
 public class ImageProcessing {
+    private static VideoCap videoCap;
+
+    private static Mat img_prewittH ;
+    private static Mat img_prewittV ;
+    private static Mat normeGr;
+    private static BufferedImage sourceImg;
+
+    public ImageProcessing(){
+        videoCap = new VideoCap();
+        img_prewittH = new Mat(720, 1280, CV_32F);
+        img_prewittV = new Mat(720, 1280, CV_32F);
+        normeGr  = new Mat(720, 1280, CV_32F);
+        
+    }
+
+    public BufferedImage Traitement()
+    {
+        sourceImg =videoCap.getOneFrame();
+        Mat cameraMat = ImageProcessing.BufferedImageToMat(sourceImg);
+        Mat cameraMat_GREY = ImageProcessing.MatRGBToGrey(cameraMat);
+        ////Mat cameraMat = ImageProcessing.DownsizeResolution(cameraMat_full,4);
+
+        // Template
+        //BufferedImage template = ImageProcessing.PatternImage();
+        //Mat template_mat_RGB = ImageProcessing.BufferedImageToMat(template);
+        //Mat template_mat_GREY = ImageProcessing.MatRGBToGrey(template_mat_RGB);
+
+
+
+        //ImageProcessing.applyPrewittH(cameraMat_GREY, img_prewittH);
+        //ImageProcessing.applyPrewittV(cameraMat_GREY,img_prewittV);
+        //ImageProcessing.NormeGradient(img_prewittH,img_prewittV,normeGr);
+
+        Mat test = ImageProcessing.MatToMatCV_8C1(cameraMat_GREY);  //TODO super long , a optimiser
+        //Mat prewittH_converted = ImageProcessing.MatToMatCV_8C1(test);
+        BufferedImage test2 = ImageProcessing.MatToBufferedImage(test);
+        return sourceImg;
+    }
+
+
+
+
 
 
     static BufferedImage PatternImage() {
