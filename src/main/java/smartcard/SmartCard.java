@@ -36,24 +36,45 @@ public class SmartCard {
         return text;
     }
 
-    private static ResponseAPDU read(int P2, int length) throws CardException {
-        System.out.println("Reading " + length + " words at " + P2);
+    private static void read(int P2, int length) throws CardException {
+        System.out.println("Reading " + length + " words at 0x" + Integer.toHexString(P2));
         ResponseAPDU r = channel.transmit(new CommandAPDU(0x80, 0xBE, 00, P2, length));
         System.out.println("SW : " + Integer.toHexString(r.getSW()));
         String text = toString(r.getData());
         if (!text.isEmpty())
             System.out.println(text);
-        return r;
     }
 
-    private static ResponseAPDU verify(int P2, byte[] PIN) throws CardException {
-        System.out.println("Verifying PIN " + toString(PIN) + " at " + P2);
+    private static void verify(int P2, byte[] PIN) throws CardException {
+        System.out.println("Verifying PIN " + toString(PIN) + " at 0x" + Integer.toHexString(P2));
         ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, 0x20, 0x00, P2, PIN, 0x04));
         System.out.println("SW : " + Integer.toHexString(r.getSW()));
         String text = toString(r.getData());
         if (!text.isEmpty())
             System.out.println(text);
-        return r;
+    }
+
+    private static void verify(int PIN) throws CardException {
+        switch (PIN) {
+            case 0:
+                verify(P2_CSC0, CSC0);
+                break;
+            case 1:
+                verify(P2_CSC1, CSC1);
+                break;
+            case 2:
+                verify(P2_CSC2, CSC2);
+                break;
+        }
+    }
+
+    private static void update(int P2, byte[] data, int length) throws CardException {
+        System.out.println("Writing " + toString(data) + " at 0x" + Integer.toHexString(P2));
+        ResponseAPDU r = channel.transmit(new CommandAPDU(0x80, 0xDE, 0x00, P2, data, 0x00, length));
+        System.out.println("SW : " + Integer.toHexString(r.getSW()));
+        String text = toString(r.getData());
+        if (!text.isEmpty())
+            System.out.println(text);
     }
 
     public static void main(String[] args) throws CardException {
@@ -63,9 +84,9 @@ public class SmartCard {
         System.out.println("ATR : " + toString(card.getATR().getBytes()));
         channel = card.getBasicChannel();
 
-        read(0x06, 0x04);
-        verify(P2_CSC0, CSC0);
-        read(0x06, 0x04);
+        verify(0);
+        read(0x10, 0x04);
+        update(0x10, DatatypeConverter.parseHexBinary("1042434445464748"), 0x08);
 
         card.disconnect(true);
     }
