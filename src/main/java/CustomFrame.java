@@ -4,36 +4,32 @@ import java.awt.*;
 
 public class CustomFrame extends JFrame {
     private JPanel contentPane;
-
-    public static void main(String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    CustomFrame frame = new CustomFrame();
-                    frame.setVisible(true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
-
+    private ImageProcessing imageProcessing;
     public CustomFrame() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setBounds(0, 0, 1280, 720);
+        setBounds(0, 0, ImageProcessing.IMG_WIDTH, ImageProcessing.IMG_HEIGHT);
         contentPane = new JPanel();
         contentPane.setBorder(new EmptyBorder(0, 0, 0, 0));
         setContentPane(contentPane);
         contentPane.setLayout(null);
-
+        imageProcessing = new ImageProcessing();
         new MyThread().start();
+
+
+
     }
 
-    VideoCap videoCap = new VideoCap();
+
+
+
 
     public void paint(Graphics g) {
         g = contentPane.getGraphics();
-        g.drawImage(videoCap.getOneFrame(), 0, 0, this);
+        //capture camera
+
+
+
+        g.drawImage(imageProcessing.processing(), 0, 0, this);
     }
 
     class MyThread extends Thread {
@@ -42,7 +38,7 @@ public class CustomFrame extends JFrame {
             for (; ; ) {
                 repaint();
                 try {
-                    Thread.sleep(30);
+                    Thread.sleep(100);
                 } catch (InterruptedException e) {
                 }
             }
