@@ -4,17 +4,19 @@ import java.awt.*;
 
 public class CustomFrame extends JFrame {
     private JPanel contentPane;
-    private ImageProcessing ip;
+    private ImageProcessing imageProcessing;
     public CustomFrame() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setBounds(0, 0, 1280, 720);
+        setBounds(0, 0, ImageProcessing.IMG_WIDTH, ImageProcessing.IMG_HEIGHT);
         contentPane = new JPanel();
         contentPane.setBorder(new EmptyBorder(0, 0, 0, 0));
         setContentPane(contentPane);
         contentPane.setLayout(null);
-        ip = new ImageProcessing();
-
+        imageProcessing = new ImageProcessing();
         new MyThread().start();
+
+
+
     }
 
 
@@ -27,7 +29,7 @@ public class CustomFrame extends JFrame {
 
 
 
-        g.drawImage(ip.Traitement(), 0, 0, this);
+        g.drawImage(imageProcessing.processing(), 0, 0, this);
     }
 
     class MyThread extends Thread {
@@ -36,7 +38,7 @@ public class CustomFrame extends JFrame {
             for (; ; ) {
                 repaint();
                 try {
-                    Thread.sleep(10);
+                    Thread.sleep(100);
                 } catch (InterruptedException e) {
                 }
             }
