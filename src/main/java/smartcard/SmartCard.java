@@ -52,6 +52,25 @@ public class SmartCard {
         String text = toString(r.getData());
         if (!text.isEmpty())
             System.out.println(text);
+
+        r = channel.transmit(new CommandAPDU(0x80, 0xBE, 00, 0x07, 0x04));
+        switch (r.getData()[3]) {
+            case -128:
+                System.out.println("3 tries left.");
+                break;
+            case -64:
+                System.out.println("2 tries left.");
+                break;
+            case -32:
+                System.out.println("1 try left.");
+                break;
+            case 0:
+                System.out.println("Code accepted.");
+                break;
+            default:
+                System.out.println("Card blocked.");
+                break;
+        }
     }
 
     private static void verify(int PIN) throws CardException {
@@ -86,7 +105,7 @@ public class SmartCard {
 
         verify(0);
         read(0x10, 0x04);
-        update(0x10, DatatypeConverter.parseHexBinary("1042434445464748"), 0x08);
+//        update(0x10, DatatypeConverter.parseHexBinary("1042434445464748 "), 0x08);
 
         card.disconnect(true);
     }
