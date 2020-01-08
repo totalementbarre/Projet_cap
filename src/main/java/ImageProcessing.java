@@ -7,25 +7,26 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
 import java.awt.image.DataBufferInt;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
+import static java.lang.System.exit;
 import static org.opencv.core.CvType.*;
 
 public class ImageProcessing {
-
-    public static final int IMG_HEIGHT = 720;
     public static final int IMG_WIDTH = 1280;
+    public static final int IMG_HEIGHT = 720;
+    public static final int SEUIL_HOUGH = 10;
 
     private VideoCap videoCap;
-    private Mat img_prewittH;
-    private Mat img_prewittV;
-    private Mat normeGr;
+    public Mat gradientNorm;
+    private Mat gradientAngles;
     private Mat imgMat;
     private Mat imgMatGREY;
     private Mat normeGr8UC1;
-
+    private Mat Angles8UC1;
 
     private BufferedImage sourceImg;
     private BufferedImage imgMatBuff;
@@ -33,18 +34,70 @@ public class ImageProcessing {
 
     public ImageProcessing() {
         videoCap = new VideoCap();
-        //img_prewittH = new Mat(IMG_HEIGHT, IMG_WIDTH, CV_32F);
-        //img_prewittV = new Mat(IMG_HEIGHT, IMG_WIDTH, CV_32F);
-        normeGr = new Mat(IMG_HEIGHT, IMG_WIDTH, CV_32F);
+
+
+        gradientNorm = new Mat(IMG_HEIGHT, IMG_WIDTH, CV_32F);
+        gradientAngles = new Mat(IMG_HEIGHT, IMG_WIDTH, CV_32F);
         normeGr8UC1 = new Mat(IMG_HEIGHT, IMG_WIDTH, CV_8UC1);
+        Angles8UC1 = new Mat(IMG_HEIGHT, IMG_WIDTH, CV_8UC1);
         imgMat = new Mat(IMG_HEIGHT, IMG_WIDTH, CV_8UC3);
         imgMatGREY = new Mat(IMG_HEIGHT, IMG_WIDTH, CV_8UC1);
 
+
+
+
+
         imgMatBuff = new BufferedImage(IMG_WIDTH, IMG_HEIGHT, BufferedImage.TYPE_BYTE_GRAY);
+        //imgMatBuff = new BufferedImage(IMG_WIDTH, IMG_HEIGHT, BufferedImage.TYPE_3BYTE_BGR);
+
+        HoughTemplateCreation();
+
+
+
+
         Thread t1 = new Thread(videoCap);
         t1.start();
-        //imgMatBuff = new BufferedImage(IMG_WIDTH, IMG_HEIGHT, BufferedImage.TYPE_3BYTE_BGR);
     }
+
+    private void HoughTemplateCreation(){
+
+        //INIT HOUGH GENERALISE
+        Hough h = new Hough(SEUIL_HOUGH,1);
+        Mat tempMat= new Mat(IMG_HEIGHT, IMG_WIDTH, CV_8UC3);
+        Mat tempMatG= new Mat(IMG_HEIGHT, IMG_WIDTH, CV_8UC1);
+        BufferedImage template = PatternImage();
+        BufferedImageToMat(template, tempMat);
+        MatRGBToGrey(tempMat, tempMatG);
+        GradientFast(tempMatG, gradientNorm,gradientAngles);
+
+
+
+
+        h.Barycentre(tempMatG);
+        //System.out.println("Centre x:"+h.getX_pos()+"\ty:"+h.getY_pos());
+
+        Mat HoughOutMat= new Mat(IMG_HEIGHT, IMG_WIDTH, CV_32F);
+        h.Transformation(gradientNorm,gradientAngles,HoughOutMat);
+
+
+        exit(0);
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public BufferedImage processing() {
         Date date = new Date();
@@ -53,77 +106,87 @@ public class ImageProcessing {
         if (videoCap.isReady()) {
             sourceImg = videoCap.getCurrentImageCopy();
 
+            sourceImg = PatternImage();
+
             BufferedImageToMat(sourceImg, imgMat);
             MatRGBToGrey(imgMat, imgMatGREY);
 
+            GradientFast(imgMatGREY, gradientNorm,gradientAngles);
 
-            Gradient(imgMatGREY, normeGr);
+            //showMiniMax(gradientNorm);
+            gradientNorm.convertTo(normeGr8UC1, CV_8UC1);
 
-            normeGr.convertTo(normeGr8UC1, CV_8UC1);
+            gradientAngles.convertTo(Angles8UC1,CV_8UC1);
+
+
+            //MatToBufferedImage(Angles8UC1, imgMatBuff);
             MatToBufferedImage(normeGr8UC1, imgMatBuff);
 
-        /*
-        Mat cameraMat = ImageProcessing.BufferedImageToMat(sourceImg);
-        Mat cameraMat_GREY = ImageProcessing.MatRGBToGrey(cameraMat);
-        long convToGrayTime = (new Date()).getTime();
-        System.out.println("Converting to gray : " + (convToGrayTime - startingTime));
-        ////Mat cameraMat = ImageProcessing.DownsizeResolution(cameraMat_full,4);
 
-        // Template
-        //BufferedImage template = ImageProcessing.PatternImage();
-        //Mat template_mat_RGB = ImageProcessing.BufferedImageToMat(template);
-        //Mat template_mat_GREY = ImageProcessing.MatRGBToGrey(template_mat_RGB);
-
-
-        ImageProcessing.applyPrewittH(cameraMat_GREY, img_prewittH);
-        ImageProcessing.applyPrewittV(cameraMat_GREY, img_prewittV);
-        long prewittTime = (new Date()).getTime();
-        System.out.println("Converting to prewitt : " + (prewittTime - convToGrayTime));
-
-        ImageProcessing.NormeGradient(img_prewittH, img_prewittV, normeGr);
-        long gradientTime = (new Date()).getTime();
-        System.out.println("Gradient : " + (gradientTime - prewittTime));
-
-        Mat test = ImageProcessing.MatToMatCV_8C1(normeGr);  //TODO super long , a optimiser
-        long matToMatTime = (new Date()).getTime();
-        System.out.println("MatToMat : " + (matToMatTime - gradientTime));
-        //Mat prewittH_converted = ImageProcessing.MatToMatCV_8C1(test);
-
-        BufferedImage test2 = ImageProcessing.MatToBufferedImage(test);
-        long matToBufTime = (new Date()).getTime();
-        System.out.println("MatToBuffer : " + (matToBufTime - matToMatTime));
-
-        System.out.println("Total processing duration time : " + ((new Date()).getTime() - startingTime) + "\n");
-        return test2;
-
-         */
         }
+        long loopTime = (new Date()).getTime();
+        System.out.println("Loop duration : " + (loopTime - startingTime));
+
         return imgMatBuff;
     }
 
-    public void Gradient(Mat in, Mat norm) {
+
+
+    public void showMiniMax(Mat m) {
+        //Mat out = new Mat(m.rows(), m.cols(), CV_8UC1);
+        Core.MinMaxLocResult mmr = Core.minMaxLoc(m);
+        double min = mmr.minVal;
+        double max = mmr.maxVal;
+        System.out.println("Min"+min+"   Max"+max);
+
+    }
+
+
+
+    private double [] norm_array = new double[IMG_HEIGHT*IMG_WIDTH];
+    private double [] angles_array = new double[IMG_HEIGHT*IMG_WIDTH];
+
+    public void GradientFast(Mat in, Mat norm,Mat angles) {
         int nb_lignes = in.rows();
         int nb_cols = in.cols();
-        ;
-        for (int i = 1; i < nb_lignes - 1; i++) {
-            for (int j = 1; j < nb_cols - 1; j++) {
-                double temp[] = in.get(i, j - 1);
-                double h = temp[0] * -1;
-                double temp2[] = in.get(i, j);
-                h += temp2[0] * 1;
-
-                double temp3[] = in.get(i - 1, j);
-                double v = temp3[0] * -1;
-                double temp4[] = in.get(i, j);
-                v += temp4[0] * 1;
+        int size = nb_cols*nb_lignes;
+        byte [] bytes = new byte[size];
+        //double [] norm_array = new double[size];
+        //double [] angles_array = new double[size];
+        in.get(0,0, bytes); // all of them.
 
 
-                double n = Math.sqrt(Math.pow(h, 2) + Math.pow(v, 2));
+        float gradH,gradV;
+        for (int x = 1; x < nb_cols; x++) {
+            for (int y = 1; y < nb_lignes; y++) {
+                byte pixel_at_x_y = bytes[ y * nb_cols + x ];
+                gradH= -bytes[ y * nb_cols + (x-1) ]+bytes[ y * nb_cols + x ];
+                gradV= -bytes[ (y-1) * nb_cols + x ]+bytes[ y * nb_cols + x ];
 
-                norm.put(i, j, n);
+                //norm_array[y * nb_cols + x] = (gradV)*10+127;// + Math.abs(gradH);
+                norm_array[y * nb_cols + x] = Math.sqrt(Math.pow(gradH,2)+Math.pow(gradV,2));
+
+                angles_array [y * nb_cols + x] = Math.atan2(gradH,gradV)*180/3.14;
+                //angles_array [y * nb_cols + x] = 127;
+
+                //System.out.println(angles_array [y * nb_cols + x]);
+
             }
 
         }
+
+        norm.put(0, 0, norm_array);
+        angles.put(0, 0, angles_array);
+
+
+    }
+
+
+
+    private static int converter(int l,int c, int nb_lignes, int nb_cols){
+        int resultat =c*nb_lignes+l;
+        if (resultat>0) return resultat;
+        else return 0;
 
     }
 
@@ -132,9 +195,12 @@ public class ImageProcessing {
 
     }
 
+
     public void BufferedImageToMat(BufferedImage sourceImg, Mat imgMat) {
 
-
+        byte[] pixels = ((DataBufferByte) sourceImg.getRaster().getDataBuffer()).getData();
+        imgMat.put(0, 0, pixels);
+        /*
         DataBuffer dataBuffer = sourceImg.getRaster().getDataBuffer();
         byte[] imgPixels = null;
 
@@ -157,9 +223,7 @@ public class ImageProcessing {
                 imgPixels[p * 3 + 0] = (byte) ((imgIntegerPixels[p] & 0x00FF0000) >> 16);
                 imgPixels[p * 3 + 1] = (byte) ((imgIntegerPixels[p] & 0x0000FF00) >> 8);
                 imgPixels[p * 3 + 2] = (byte) (imgIntegerPixels[p] & 0x000000FF);
-                /*imgPixels[p*3 + 0] = (byte)255;
-                imgPixels[p*3 + 1] = (byte)255;
-                imgPixels[p*3 + 2] = (byte)255;*/
+
             }
         }
 
@@ -168,7 +232,7 @@ public class ImageProcessing {
             imgMat.put(0, 0, imgPixels);
         }
 
-
+    */
     }
 
     public void MatToBufferedImage(Mat m, BufferedImage image) {
@@ -185,14 +249,49 @@ public class ImageProcessing {
         }
 
     }
+    ///////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
 
+    public void Gradient(Mat in, Mat norm) {
+        int nb_lignes = in.rows();
+        int nb_cols = in.cols();
+        double temp[],temp2[],temp3[],temp4[];
+        double h,v;
+
+        for (int i = 1; i < nb_lignes - 1; i++) {
+            for (int j = 1; j < nb_cols - 1; j++) {
+
+                temp = in.get(i, j - 1);
+                h = temp[0] * -1;
+                temp2 = in.get(i, j);
+                h += temp2[0] * 1;
+
+                temp3 = in.get(i - 1, j);
+                v = temp3[0] * -1;
+                temp4 = in.get(i, j);
+                v += temp4[0] * 1;
+
+
+                //double n = Math.sqrt(Math.pow(h, 2) + Math.pow(v, 2));
+                double n=127;
+                norm.put(i, j, n);
+            }
+
+        }
+
+    }
 
     ////////////////////////////old
 
     static BufferedImage PatternImage() {
         BufferedImage img = null;
         try {
-            img = ImageIO.read(new File("/DATA/FAC/M2/carte_a_puce/ellipse.png"));
+            img = ImageIO.read(new File("/DATA/FAC/M2/carte_a_puce/ellipse2.png"));
         } catch (IOException e) {
 
         }
@@ -411,3 +510,38 @@ public class ImageProcessing {
         return m;
     }
 }
+ /*
+        Mat cameraMat = ImageProcessing.BufferedImageToMat(sourceImg);
+        Mat cameraMat_GREY = ImageProcessing.MatRGBToGrey(cameraMat);
+        long convToGrayTime = (new Date()).getTime();
+        System.out.println("Converting to gray : " + (convToGrayTime - startingTime));
+        ////Mat cameraMat = ImageProcessing.DownsizeResolution(cameraMat_full,4);
+
+        // Template
+        //BufferedImage template = ImageProcessing.PatternImage();
+        //Mat template_mat_RGB = ImageProcessing.BufferedImageToMat(template);
+        //Mat template_mat_GREY = ImageProcessing.MatRGBToGrey(template_mat_RGB);
+
+
+        ImageProcessing.applyPrewittH(cameraMat_GREY, img_prewittH);
+        ImageProcessing.applyPrewittV(cameraMat_GREY, img_prewittV);
+        long prewittTime = (new Date()).getTime();
+        System.out.println("Converting to prewitt : " + (prewittTime - convToGrayTime));
+
+        ImageProcessing.NormeGradient(img_prewittH, img_prewittV, normeGr);
+        long gradientTime = (new Date()).getTime();
+        System.out.println("Gradient : " + (gradientTime - prewittTime));
+
+        Mat test = ImageProcessing.MatToMatCV_8C1(normeGr);
+        long matToMatTime = (new Date()).getTime();
+        System.out.println("MatToMat : " + (matToMatTime - gradientTime));
+        //Mat prewittH_converted = ImageProcessing.MatToMatCV_8C1(test);
+
+        BufferedImage test2 = ImageProcessing.MatToBufferedImage(test);
+        long matToBufTime = (new Date()).getTime();
+        System.out.println("MatToBuffer : " + (matToBufTime - matToMatTime));
+
+        System.out.println("Total processing duration time : " + ((new Date()).getTime() - startingTime) + "\n");
+        return test2;
+
+         */

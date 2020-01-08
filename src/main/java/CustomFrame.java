@@ -1,10 +1,11 @@
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.io.IOException;
 
 public class CustomFrame extends JFrame {
     private JPanel contentPane;
-    private ImageProcessing imageProcessing;
+    private ImageProcessingOpti imageProcessing;
     public CustomFrame() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(0, 0, ImageProcessing.IMG_WIDTH, ImageProcessing.IMG_HEIGHT);
@@ -12,7 +13,7 @@ public class CustomFrame extends JFrame {
         contentPane.setBorder(new EmptyBorder(0, 0, 0, 0));
         setContentPane(contentPane);
         contentPane.setLayout(null);
-        imageProcessing = new ImageProcessing();
+        imageProcessing = new ImageProcessingOpti();
         new MyThread().start();
 
 
@@ -30,6 +31,7 @@ public class CustomFrame extends JFrame {
 
 
         g.drawImage(imageProcessing.processing(), 0, 0, this);
+
     }
 
     class MyThread extends Thread {
@@ -38,7 +40,7 @@ public class CustomFrame extends JFrame {
             for (; ; ) {
                 repaint();
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(1);
                 } catch (InterruptedException e) {
                 }
             }

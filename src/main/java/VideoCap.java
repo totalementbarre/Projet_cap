@@ -28,7 +28,7 @@ public class VideoCap implements Runnable {
         cap.set(CV_CAP_PROP_FRAME_WIDTH, ImageProcessing.IMG_WIDTH); //to get the actual width of the camera
         cap.set(Videoio.CV_CAP_PROP_FRAME_HEIGHT, ImageProcessing.IMG_HEIGHT);//to get the actual height of the camera
 //        cap.set(CAP_PROP_FPS, 1);
-        cap.set(CAP_PROP_FPS, 1);
+        //cap.set(CAP_PROP_FPS, 1);
         currentImage = null;
         shouldRun = true;
         isReady = false;
