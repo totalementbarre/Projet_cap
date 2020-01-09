@@ -74,16 +74,17 @@ public class VideoCap implements Runnable {
         while (shouldRun) {
             cap.read(image);
             this.currentImageMat = image;
+            this.currentImage = mat2Img.getImage(image);
             isReady = true;
         }
     }
 
-//    public synchronized BufferedImage getCurrentImageCopy() {
-//        ColorModel cm = currentImage.getColorModel();
-//        boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
-//        WritableRaster raster = currentImage.copyData(null);
-//        return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
-//    }
+    public synchronized BufferedImage getCurrentImageCopy() {
+        ColorModel cm = currentImage.getColorModel();
+        boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
+        WritableRaster raster = currentImage.copyData(null);
+        return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
+    }
 
     public synchronized Mat getCurrentImageMatCopy() {
         return currentImageMat.clone();

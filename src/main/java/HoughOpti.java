@@ -50,12 +50,13 @@ public class HoughOpti {
                         if(indice!=0 &&indice !=180 &&indice !=90) {
                             float dc = (float) (c - col_centre);
                             float dl = (float) (l - ligne_centre);
-                            float alpha = (float) (Math.atan2(dl, dc) * 180 / 3.14 + 180);
+                            float r = (float) Math.sqrt(Math.pow(c,2) + Math.pow(l,2)    );
+                            float alpha = (float) (Math.atan2(dl, dc));
                             ///beta[indice][0] = dc;
                             //beta[indice][1] = dl;
                             //System.out.println(indice);
 
-                            beta[indice].add(new Beta(alpha, dc, dl));
+                            beta[indice].add(new Beta(alpha, dc, dl,r));
                             count++;
                         }
                     }
@@ -119,19 +120,78 @@ public class HoughOpti {
 
     }
 
+    public void houghVoteLine(float[][] norm, float[][] angle,ArrayList<HoughOpti.Beta>[] beta, float[][] out){
+        for (int c = 0; c < ImageProcessingOpti.IMG_WIDTH_REDUCED; c++) {
+            for (int l = 0; l < ImageProcessingOpti.IMG_HEIGHT_REDUCED; l++) {
+                out[c][l] =0;
+            }
+        }
+
+
+        for (int c = 0; c < ImageProcessingOpti.IMG_WIDTH_REDUCED; c++) {
+            for (int l = 0; l < ImageProcessingOpti.IMG_HEIGHT_REDUCED; l++) {
+                if (norm[c][l] > 100) {
+                    int indice = (int) (angle[c][l]) + 180;
+                    if (indice >= 0 && indice < 360 / pas_angle) {
+                        for (HoughOpti.Beta b : beta[indice]) {
+                            double r = b.rayon;
+                            double ang =b.alpha;
+                            double rho;
+                            //int MARGE = 10;
+                            int dc = (int) (c - b.dist_c);
+                            int dl = (int) (l - b.dist_l);
+
+                            /*
+                            for (int x = dc-MARGE; x < dc+MARGE; x++) {
+                                for (int y = dl - MARGE; y < dl+MARGE; y++) {
+                                    if(x>=0 && x <ImageProcessingOpti.IMG_WIDTH_REDUCED &&y>=0 && y<ImageProcessingOpti.IMG_HEIGHT_REDUCED) out[x][y]++;
+
+                                }
+                            }
+                            */
+
+                            int MARGE = 10;
+                            for (int x = 0+MARGE; x < ImageProcessingOpti.IMG_WIDTH_REDUCED-MARGE; x++) {
+                                for (int y = 0+MARGE; y < ImageProcessingOpti.IMG_HEIGHT_REDUCED-MARGE; y++) {
+                                    rho = y*Math.cos(ang) + x*Math.sin(ang);
+                                    //System.out.println("rho_theo:"+r+"\trho :"+rho );
+                                    if(Math.abs(rho - r)<1){
+                                        out[x][y]++;
+                                        //System.out.println("rho_theo:"+r+"\trho :"+rho );
+
+                                    }
+
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+                }
+
+            }
+
+        }
+
+    }
+
     public class Beta {
         public double alpha = 0;
         public double dist_c = 0;
         public double dist_l = 0;
+        public double rayon = 0;
 
-        public Beta(double alpha, double dist_c, double dist_l) {
+        public Beta(double alpha, double dist_c, double dist_l, double r) {
             this.alpha = alpha;
             this.dist_c = dist_c;
             this.dist_l = dist_l;
+            this.rayon = r;
         }
 
         public void affichage() {
-            System.out.println("a:" + alpha + "\tdc:" + dist_c + "\tdl:" + dist_l);
+            System.out.println("a:" + alpha + "\tdc:" + dist_c + "\tdl:" + dist_l+ "\trayon:" + rayon);
         }
     }
 }

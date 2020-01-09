@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import static java.lang.StrictMath.floor;
+import static org.opencv.core.CvType.CV_32F;
 import static org.opencv.core.CvType.CV_8UC3;
 
 public class ImageProcessingOpti {
@@ -38,10 +39,10 @@ public class ImageProcessingOpti {
 
     private BufferedImage sourceImg;
     private BufferedImage imgToPlot;
-    private BufferedImage mask;
+
 
     private Mat mat_img;
-
+    private Mat mask;
     //hough
     private ArrayList<HoughOpti.Beta>[] beta;
     private HoughOpti h;
@@ -53,8 +54,9 @@ public class ImageProcessingOpti {
     public ImageProcessingOpti() {
         videoCap = new VideoCap();
         imgToPlot = new BufferedImage(IMG_WIDTH, IMG_HEIGHT, BufferedImage.TYPE_3BYTE_BGR);
-        mask = new BufferedImage(IMG_WIDTH, IMG_HEIGHT, BufferedImage.TYPE_3BYTE_BGR);
+        //mask = new BufferedImage(IMG_WIDTH, IMG_HEIGHT, BufferedImage.TYPE_3BYTE_BGR);
 
+        mask= new Mat(IMG_HEIGHT, IMG_WIDTH, CV_8UC3);
 
         gradientNorm = new float[IMG_WIDTH_REDUCED][IMG_HEIGHT_REDUCED];
         gradientAngles = new float[IMG_WIDTH_REDUCED][IMG_HEIGHT_REDUCED];
@@ -70,7 +72,7 @@ public class ImageProcessingOpti {
         hough_out_reduced = new float[IMG_WIDTH_REDUCED][IMG_HEIGHT_REDUCED];
 
 
-        //HoughTemplateCreation();
+        HoughTemplateCreation();
         videoCapFrame = new DisplayFrame();
         finalResultFrame = new DisplayFrame();
 
@@ -81,7 +83,7 @@ public class ImageProcessingOpti {
         // SUBSTRACTOR
         backSub = Video.createBackgroundSubtractorKNN();
 
-        //MaskingCreator(mask);
+        MaskingCreator(mask);
 
 
     }
@@ -107,7 +109,7 @@ public class ImageProcessingOpti {
 
 
         h.Barycentre(temp_reduced);
-        //h.PatternCreation(temp_grad_norm,temp_grad_angle);
+        h.PatternCreation(temp_grad_norm,temp_grad_angle,beta);
         System.out.println("Centre x:" + h.getCol_centre() + "\ty:" + h.getLigne_centre());
 
 
@@ -117,8 +119,7 @@ public class ImageProcessingOpti {
         //b.affichage();
 
 
-        //Mat HoughOutMat= new Mat(IMG_HEIGHT, IMG_WIDTH, CV_32F);
-        //h.Transformation(gradientNorm,gradientAngles,HoughOutMat);
+        Mat HoughOutMat= new Mat(IMG_HEIGHT, IMG_WIDTH, CV_32F);
 
 
         //exit(0);
@@ -132,61 +133,67 @@ public class ImageProcessingOpti {
 //        sourceImg = videoCap.getOneFrame();
         if (videoCap.isReady()) {
             //capture + conversion + reduction
-            //sourceImg = videoCap.getCurrentImageCopy();
+            sourceImg = videoCap.getCurrentImageCopy();
+
 
             mat_img = videoCap.getCurrentImageMatCopy();
-            //sourceImg = PatternImage();
+            HoughCircles c = new HoughCircles(mat_img);
+            videoCapFrame.paint(videoCapFrame.getGraphics(), mat_img);
+            //sourceImg = PatternImage("/DATA/FAC/M2/carte_a_puce/ellipse3.png");
             //gradientNormFrame.setCurrentImage(sourceImg);
 
-//            substractor(sourceImg,mask);
-//
-            videoCapFrame.paint(videoCapFrame.getGraphics(), mat_img);
-//
-//
-//
-//
-//
-//            //sourceImg = mask;
-//            BufferedImageToArray(sourceImg, image);
-//            ArrayReducer(image, image_reduced);
-//
-//
-//            GradientFastBin(image_reduced, gradientNorm, gradientAngles, IMG_WIDTH_REDUCED, IMG_HEIGHT_REDUCED, 200);
-//            //GradientFast(image_reduced, gradientNorm, gradientAngles, IMG_WIDTH_REDUCED, IMG_HEIGHT_REDUCED);
-//
-//            h.houghVote(gradientNorm, gradientAngles, beta, hough_out_reduced);
-//
-//
-//            // conversion sortie
-//            ArrayIncreaser(hough_out_reduced, image_out);
-//            //ArrayToBufferedImage(gradientAngles, imgToPlot);
-//            ArrayToBufferedImage(image_out, imgToPlot);
+/*
+
+            //SUBSTRACTOR
+            //mat_img = videoCap.getCurrentImageMatCopy();
+            //Mat maskfg = mask.clone();
+            //substractor(mat_img,maskfg);
+            //videoCapFrame.paint(videoCapFrame.getGraphics(), maskfg);
+            //sourceImg = Mat2Image.matToImage(maskfg);
+//            // FIN DE SUSBSTRACTOR
+
+
+            videoCapFrame.paint(videoCapFrame.getGraphics(), sourceImg);
+            //sourceImg = mask;
+            BufferedImageToArray(sourceImg, image);
+            ArrayReducer(image, image_reduced);
+
+
+            GradientFastBin(image_reduced, gradientNorm, gradientAngles, IMG_WIDTH_REDUCED, IMG_HEIGHT_REDUCED, 200);
+            //GradientFast(image_reduced, gradientNorm, gradientAngles, IMG_WIDTH_REDUCED, IMG_HEIGHT_REDUCED);
+
+            System.out.println("AVANT HOUGH");
+            h.houghVoteLine(gradientNorm, gradientAngles, beta, hough_out_reduced);
+            System.out.println("APRES HOUGH");
+
+            // conversion sortie
+            ArrayIncreaser(hough_out_reduced, image_out);
+            ArrayToBufferedImage(image_out, imgToPlot);
+            //ArrayToBufferedImage(image_out, imgToPlot);
 
         }
         long loopTime = (new Date()).getTime();
 //        System.out.println("Loop duration : " + (loopTime - startingTime));
 
         finalResultFrame.paint(finalResultFrame.getGraphics(), imgToPlot);
+        */
+
+
+
+
+        }
         return imgToPlot;
     }
-    private void substractor(BufferedImage image, BufferedImage mask){
 
-        byte[] img = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
-        byte[] m = ((DataBufferByte) mask.getRaster().getDataBuffer()).getData();
-        Mat mat_img = new Mat(IMG_HEIGHT, IMG_WIDTH, CV_8UC3);
-        Mat mat_mask = new Mat(IMG_HEIGHT, IMG_WIDTH, CV_8UC3);
-        mat_img.put(0, 0, img);
-        mat_mask.put(0,0,m);
+    private void substractor(Mat image, Mat mask){
 
 
-        //backSub.apply(mat_img, mat_mask);
 
-        mat_img.get(0,0,img);
-        //image.getRaster().setDataElements(0,0,IMG_HEIGHT,IMG_WIDTH,mat_img);
+        backSub.apply(image, mask);
 
     }
 
-    private void MaskingCreator(BufferedImage out) {
+    private void MaskingCreator(Mat out) {
         final int nb_image_mask = 20;
         BufferedImage[] tab;
         tab = new BufferedImage[nb_image_mask];
@@ -195,7 +202,7 @@ public class ImageProcessingOpti {
             if (count==nb_image_mask) break;
             System.out.println(count);
             if (videoCap.isReady()) {
-                //tab[count] = videoCap.getCurrentImageCopy();
+                tab[count] = videoCap.getCurrentImageCopy();
                 count++;
 
             }
@@ -205,6 +212,7 @@ public class ImageProcessingOpti {
         int r, g, b, p;
         int a = 255;
         System.out.println("caca");
+        BufferedImage img_mask = new BufferedImage(IMG_WIDTH, IMG_HEIGHT, BufferedImage.TYPE_3BYTE_BGR);
         for (int c = 0; c < IMG_WIDTH; c++) {
 
             //System.out.println(c);
@@ -227,12 +235,12 @@ public class ImageProcessingOpti {
                 //System.out.println(out[c][l]);
                 p = (a << 24) | (r << 16) | (g << 8) | b;
 
-                out.setRGB(c, l, p);
+                img_mask.setRGB(c, l, p);
             }
 
         }
-
-
+        byte[] pixels = ((DataBufferByte) img_mask.getRaster().getDataBuffer()).getData();
+        out.put(0, 0, pixels);
     }
 
     private void ArrayReducer(float[][] in, float[][] out) {
@@ -287,7 +295,7 @@ public class ImageProcessingOpti {
             }
         }
 
-        //System.out.println("min:"+min +"\tmax:"+max);
+        System.out.println("min:"+min +"\tmax:"+max);
 
         for (int c = 0; c < IMG_WIDTH; c++) {
             for (int l = 0; l < IMG_HEIGHT; l++) {
