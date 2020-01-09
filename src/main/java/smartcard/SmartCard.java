@@ -227,7 +227,7 @@ public class SmartCard {
         update(P2, psk, 32);
     }
 
-    private static void getDataWithPIN(String PIN) throws CardException {
+    private static String getDataWithPIN(String PIN) throws CardException {
         String hPIN = "", data;
         for (char c : PIN.toCharArray())
             hPIN += "0" + c;
@@ -239,6 +239,7 @@ public class SmartCard {
             data = "-1,-1";
 
         System.out.println(data);
+        return data;
     }
 
     private static byte[] getCardID() throws CardException {
@@ -276,10 +277,10 @@ public class SmartCard {
         return true;
     }
 
-    public static void getIDAndDataWithPIN(String PIN) throws CardException {
+    public static String getIDAndDataWithPIN(String PIN) throws CardException {
         if (!checkPINFormat(PIN)) {
             System.out.println("-1,-1");
-            return;
+            return "-1,-1";
         }
         CardTerminal terminal = SmartCard.getTerminals().get(0);
         if (DEBUG)
@@ -289,8 +290,9 @@ public class SmartCard {
             System.out.println("ATR : " + toString(card.getATR().getBytes()));
         channel = card.getBasicChannel();
 
-        getDataWithPIN(PIN);
+        String out = getDataWithPIN(PIN);
 
         card.disconnect(true);
+        return out;
     }
 }
