@@ -12,6 +12,18 @@ import static java.lang.StrictMath.abs;
 import static org.opencv.imgproc.Imgproc.*;
 
 public class HoughCircles {
+    public List<Eyes> listEyes = new ArrayList<>();
+    public List<Eyes> listEyesWinners = new ArrayList<>();
+    public Eyes w;
+
+
+    public List<Eyes> getListEyes() {
+        return listEyes;
+    }
+
+    public Eyes getW() {
+        return w;
+    }
 
     public HoughCircles(Mat image){
         // Load the native library.
@@ -23,7 +35,7 @@ public class HoughCircles {
         Mat circles = new Mat();
         Imgproc.HoughCircles(gray, circles, Imgproc.HOUGH_GRADIENT, 1.0,
                 (double)gray.rows()/30, // change this value to detect circles with different distances to each other
-                80.0, 25.0, 5, 30); // change the last two parameters
+                100.0, 20.0, 5, 30); // change the last two parameters
         // (min_radius & max_radius) to detect larger circles
 
 
@@ -38,7 +50,7 @@ public class HoughCircles {
         }
 
 
-        List<Eyes> listEyes = new ArrayList<>();
+        //List<Eyes> listEyes = new ArrayList<>();
 
 
         double radius_tolerance = 3;
@@ -65,10 +77,10 @@ public class HoughCircles {
 
 
         for (Eyes eyes : listEyes){
-            if(abs(eyes.ratio-ideal_ratio)<3){
-                if(abs(eyes.y1-eyes.y2)<30 && eyes.x1<eyes.x2){
-
-                    System.out.println(eyes.ratio);
+            if(abs(eyes.ratio-ideal_ratio)<5){
+                if(abs(eyes.y1-eyes.y2)<50 && eyes.x1<eyes.x2){
+/*
+                    //System.out.println(eyes.ratio);
                     Point center1 = new Point(Math.round(eyes.x1), Math.round(eyes.y1));
                     int radius1 = (int)Math.round(eyes.rayon1);
                     Point center2 = new Point(Math.round(eyes.x2), Math.round(eyes.y2));
@@ -76,31 +88,29 @@ public class HoughCircles {
 
                     Imgproc.circle(image, center1, radius1, new Scalar(255,0,255), 3, 8, 0 );
                     Imgproc.circle(image, center2, radius2, new Scalar(255,0,255), 3, 8, 0 );
+  */
+                    listEyesWinners.add(eyes);
 
                 }
 
-
-
-
             }
-
 
         }
 
-//        for (int x = 0; x < circles.cols(); x++) {
-//            double[] c = circles.get(0, x);
-//            Point center = new Point(Math.round(c[0]), Math.round(c[1]));
-//            // circle center
-//            Imgproc.circle(image, center, 1, new Scalar(0,100,100), 3, 8, 0 );
-//            // circle outline
-//            int radius = (int) Math.round(c[2]);
-//            Imgproc.circle(image, center, radius, new Scalar(255,0,255), 3, 8, 0 );
-//        }
 
+        int winnerEye = listEyesWinners.size();
 
+        if(winnerEye != 0){
+            w = listEyesWinners.get(winnerEye);
+            //System.out.println(eyes.ratio);
+            Point center1 = new Point(Math.round(w.x1), Math.round(w.y1));
+            int radius1 = (int)Math.round(w.rayon1);
+            Point center2 = new Point(Math.round(w.x2), Math.round(w.y2));
+            int radius2 = (int)Math.round(w.rayon2);
 
-
-
+            Imgproc.circle(image, center1, radius1, new Scalar(255,0,255), 3, 8, 0 );
+            Imgproc.circle(image, center2, radius2, new Scalar(255,0,255), 3, 8, 0 );
+        }
 
 
     }

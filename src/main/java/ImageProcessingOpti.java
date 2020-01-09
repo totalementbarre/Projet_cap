@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static java.lang.StrictMath.floor;
 import static org.opencv.core.CvType.CV_32F;
@@ -50,6 +51,11 @@ public class ImageProcessingOpti {
 
     //substractor
     BackgroundSubtractor backSub;
+
+
+
+    //Circles
+    private List<HoughCircles.Eyes> listEyes;
 
     public ImageProcessingOpti() {
         videoCap = new VideoCap();
@@ -138,7 +144,12 @@ public class ImageProcessingOpti {
 
             mat_img = videoCap.getCurrentImageMatCopy();
             HoughCircles c = new HoughCircles(mat_img);
+
+            listEyes = c.getListEyes();
+
             videoCapFrame.paint(videoCapFrame.getGraphics(), mat_img);
+
+
             //sourceImg = PatternImage("/DATA/FAC/M2/carte_a_puce/ellipse3.png");
             //gradientNormFrame.setCurrentImage(sourceImg);
 
