@@ -47,16 +47,17 @@ public class HoughOpti {
                 if (norm[c][l] > 10) {
                     int indice = (int) (angle[c][l]) + 180;
                     if (indice >= 0 && indice < 360 / pas_angle) {
-                        float dc = (float) (c - col_centre);
-                        float dl = (float) (l - ligne_centre);
-                        float alpha = (float) (Math.atan2(dl, dc) * 180 / 3.14 + 180);
-                        ///beta[indice][0] = dc;
-                        //beta[indice][1] = dl;
-                        //System.out.println(indice);
+                        if(indice!=0 &&indice !=180 &&indice !=90) {
+                            float dc = (float) (c - col_centre);
+                            float dl = (float) (l - ligne_centre);
+                            float alpha = (float) (Math.atan2(dl, dc) * 180 / 3.14 + 180);
+                            ///beta[indice][0] = dc;
+                            //beta[indice][1] = dl;
+                            //System.out.println(indice);
 
-                        beta[indice].add(new Beta(alpha, dc, dl));
-                        count++;
-
+                            beta[indice].add(new Beta(alpha, dc, dl));
+                            count++;
+                        }
                     }
                 }
 

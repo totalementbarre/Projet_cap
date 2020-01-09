@@ -44,4 +44,20 @@ public class Mat2Image {
         mat.get(0, 0, data);
         return img;
     }
+
+    static BufferedImage matToImage(Mat mat) {
+        int type = 0;
+        if (mat.channels() == 1) {
+            type = BufferedImage.TYPE_BYTE_GRAY;
+        } else if (mat.channels() == 3) {
+            type = BufferedImage.TYPE_3BYTE_BGR;
+        }
+        BufferedImage resultImage = new BufferedImage( mat.cols(), mat.rows(), type);
+        WritableRaster raster = resultImage.getRaster();
+        DataBufferByte dataBuffer = (DataBufferByte) raster.getDataBuffer();
+        byte[] data = dataBuffer.getData();
+        mat.get(0, 0, data);
+        return resultImage;
+
+    }
 }

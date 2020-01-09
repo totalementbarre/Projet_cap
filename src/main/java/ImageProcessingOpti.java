@@ -1,12 +1,18 @@
+import org.opencv.core.Mat;
+import org.opencv.video.BackgroundSubtractor;
+import org.opencv.video.Video;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 
 import static java.lang.StrictMath.floor;
+import static org.opencv.core.CvType.CV_8UC3;
 
 public class ImageProcessingOpti {
     public static final int IMG_WIDTH = 1280;
@@ -23,6 +29,7 @@ public class ImageProcessingOpti {
 
 
     private VideoCap videoCap;
+
     private float[][] image;
     private float[][] gradientNorm;
     private float[][] gradientAngles;
@@ -31,17 +38,22 @@ public class ImageProcessingOpti {
 
     private BufferedImage sourceImg;
     private BufferedImage imgToPlot;
+    private BufferedImage mask;
 
+    private Mat mat_img;
 
     //hough
     private ArrayList<HoughOpti.Beta>[] beta;
     private HoughOpti h;
     private float[][] hough_out_reduced;
 
+    //substractor
+    BackgroundSubtractor backSub;
 
     public ImageProcessingOpti() {
         videoCap = new VideoCap();
         imgToPlot = new BufferedImage(IMG_WIDTH, IMG_HEIGHT, BufferedImage.TYPE_3BYTE_BGR);
+        mask = new BufferedImage(IMG_WIDTH, IMG_HEIGHT, BufferedImage.TYPE_3BYTE_BGR);
 
 
         gradientNorm = new float[IMG_WIDTH_REDUCED][IMG_HEIGHT_REDUCED];
@@ -58,12 +70,20 @@ public class ImageProcessingOpti {
         hough_out_reduced = new float[IMG_WIDTH_REDUCED][IMG_HEIGHT_REDUCED];
 
 
-        HoughTemplateCreation();
+        //HoughTemplateCreation();
         videoCapFrame = new DisplayFrame();
         finalResultFrame = new DisplayFrame();
 
         Thread t1 = new Thread(videoCap);
         t1.start();
+
+
+        // SUBSTRACTOR
+        backSub = Video.createBackgroundSubtractorKNN();
+
+        //MaskingCreator(mask);
+
+
     }
 
 
@@ -78,12 +98,12 @@ public class ImageProcessingOpti {
         temp_grad_norm = new float[IMG_WIDTH_REDUCED][IMG_HEIGHT_REDUCED];
 
 
-        BufferedImage template = PatternImage();
+        BufferedImage template = PatternImage("/DATA/FAC/M2/carte_a_puce/ellipse2.png");
         BufferedImageToArray(template, temp);
         ArrayReducer(temp, temp_reduced);
 
 
-        GradientFastBin(temp_reduced, temp_grad_norm, temp_grad_angle, IMG_WIDTH_REDUCED, IMG_HEIGHT_REDUCED,1000);
+        GradientFastBin(temp_reduced, temp_grad_norm, temp_grad_angle, IMG_WIDTH_REDUCED, IMG_HEIGHT_REDUCED, 1000);
 
 
         h.Barycentre(temp_reduced);
@@ -112,27 +132,35 @@ public class ImageProcessingOpti {
 //        sourceImg = videoCap.getOneFrame();
         if (videoCap.isReady()) {
             //capture + conversion + reduction
-            sourceImg = videoCap.getCurrentImageCopy();
+            //sourceImg = videoCap.getCurrentImageCopy();
+
+            mat_img = videoCap.getCurrentImageMatCopy();
             //sourceImg = PatternImage();
             //gradientNormFrame.setCurrentImage(sourceImg);
-            videoCapFrame.paint(videoCapFrame.getGraphics(), sourceImg);
 
-
-            //sourceImg = PatternImage();
-            BufferedImageToArray(sourceImg, image);
-            ArrayReducer(image, image_reduced);
-
-
-            GradientFastBin(image_reduced, gradientNorm, gradientAngles, IMG_WIDTH_REDUCED, IMG_HEIGHT_REDUCED, 50);
-            //GradientFast(image_reduced, gradientNorm, gradientAngles, IMG_WIDTH_REDUCED, IMG_HEIGHT_REDUCED);
-
-            h.houghVote(gradientNorm, gradientAngles, beta, hough_out_reduced);
-
-
-            // conversion sortie
-            ArrayIncreaser(hough_out_reduced, image_out);
-            //ArrayToBufferedImage(gradientAngles, imgToPlot);
-            ArrayToBufferedImage(image_out, imgToPlot);
+//            substractor(sourceImg,mask);
+//
+            videoCapFrame.paint(videoCapFrame.getGraphics(), mat_img);
+//
+//
+//
+//
+//
+//            //sourceImg = mask;
+//            BufferedImageToArray(sourceImg, image);
+//            ArrayReducer(image, image_reduced);
+//
+//
+//            GradientFastBin(image_reduced, gradientNorm, gradientAngles, IMG_WIDTH_REDUCED, IMG_HEIGHT_REDUCED, 200);
+//            //GradientFast(image_reduced, gradientNorm, gradientAngles, IMG_WIDTH_REDUCED, IMG_HEIGHT_REDUCED);
+//
+//            h.houghVote(gradientNorm, gradientAngles, beta, hough_out_reduced);
+//
+//
+//            // conversion sortie
+//            ArrayIncreaser(hough_out_reduced, image_out);
+//            //ArrayToBufferedImage(gradientAngles, imgToPlot);
+//            ArrayToBufferedImage(image_out, imgToPlot);
 
         }
         long loopTime = (new Date()).getTime();
@@ -140,6 +168,71 @@ public class ImageProcessingOpti {
 
         finalResultFrame.paint(finalResultFrame.getGraphics(), imgToPlot);
         return imgToPlot;
+    }
+    private void substractor(BufferedImage image, BufferedImage mask){
+
+        byte[] img = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+        byte[] m = ((DataBufferByte) mask.getRaster().getDataBuffer()).getData();
+        Mat mat_img = new Mat(IMG_HEIGHT, IMG_WIDTH, CV_8UC3);
+        Mat mat_mask = new Mat(IMG_HEIGHT, IMG_WIDTH, CV_8UC3);
+        mat_img.put(0, 0, img);
+        mat_mask.put(0,0,m);
+
+
+        //backSub.apply(mat_img, mat_mask);
+
+        mat_img.get(0,0,img);
+        //image.getRaster().setDataElements(0,0,IMG_HEIGHT,IMG_WIDTH,mat_img);
+
+    }
+
+    private void MaskingCreator(BufferedImage out) {
+        final int nb_image_mask = 20;
+        BufferedImage[] tab;
+        tab = new BufferedImage[nb_image_mask];
+        int count = 0;
+        while (true) {
+            if (count==nb_image_mask) break;
+            System.out.println(count);
+            if (videoCap.isReady()) {
+                //tab[count] = videoCap.getCurrentImageCopy();
+                count++;
+
+            }
+
+        }
+
+        int r, g, b, p;
+        int a = 255;
+        System.out.println("caca");
+        for (int c = 0; c < IMG_WIDTH; c++) {
+
+            //System.out.println(c);
+            for (int l = 0; l < IMG_HEIGHT; l++) {
+                r = 0;
+                g = 0;
+                b = 0;
+                for (int i = 0; i < nb_image_mask; i++) {
+                    //System.out.println("i:"+i);
+                    Color pix = new Color(tab[i].getRGB(c, l));
+                    r += pix.getRed();
+                    g += pix.getGreen();
+                    b += pix.getBlue();
+                }
+
+                r = r / nb_image_mask;
+                g = g / nb_image_mask;
+                b = b / nb_image_mask;
+
+                //System.out.println(out[c][l]);
+                p = (a << 24) | (r << 16) | (g << 8) | b;
+
+                out.setRGB(c, l, p);
+            }
+
+        }
+
+
     }
 
     private void ArrayReducer(float[][] in, float[][] out) {
@@ -174,6 +267,7 @@ public class ImageProcessingOpti {
                 b = pix.getBlue();
                 out[c][l] = (r + g + b) / 3;
                 //System.out.println(out[c][l]);
+
 
             }
 
@@ -274,10 +368,10 @@ public class ImageProcessingOpti {
     }
 
 
-    static BufferedImage PatternImage() {
+    static BufferedImage PatternImage(String path) {
         BufferedImage img = null;
         try {
-            img = ImageIO.read(new File("/DATA/FAC/M2/carte_a_puce/ellipse2.png"));
+            img = ImageIO.read(new File(path));
         } catch (IOException e) {
 
         }

@@ -1,3 +1,5 @@
+import org.opencv.core.Mat;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -19,6 +21,11 @@ public class DisplayFrame extends JFrame {
     public void paint(Graphics graphics, BufferedImage bufferedImage) {
         graphics = contentPane.getGraphics();
         graphics.drawImage(bufferedImage, 0, 0, this);
+    }
+
+    public void paint(Graphics graphics, Mat matImage) {
+        graphics = contentPane.getGraphics();
+        graphics.drawImage(Mat2Image.matToImage(matImage), 0, 0, this);
     }
 
 }
