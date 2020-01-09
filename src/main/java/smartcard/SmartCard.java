@@ -7,6 +7,14 @@ import java.util.List;
 import java.util.Random;
 
 public class SmartCard {
+
+    /*
+     *  READ : 80 BE 00 P2 Le
+     *  VERIFY : 00 20 00 P2 04 PIN=(AAAAAAAA / 11111111 / 22222222) 04
+     */
+
+    private static final boolean DEBUG = false;
+
     private static final int P2_CSC0 = 0x07;
     private static final int P2_CSC1 = 0x39;
     private static final int P2_CSC2 = 0x3B;
@@ -65,66 +73,79 @@ public class SmartCard {
 
     private static void read(int P2, int length) throws CardException {
         String text;
-        System.out.println("Reading " + length + " words at 0x" + Integer.toHexString(P2));
+        if (DEBUG)
+            System.out.println("Reading " + length + " words at 0x" + Integer.toHexString(P2));
         ResponseAPDU r = channel.transmit(new CommandAPDU(0x80, 0xBE, 00, P2, length));
-        System.out.println("SW : " + Integer.toHexString(r.getSW()));
+        if (DEBUG)
+            System.out.println("SW : " + Integer.toHexString(r.getSW()));
         if (P2 == 0x04 || P2 == 0x05)
             text = toBString(r.getData());
         else
             text = toString(r.getData());
-        if (!text.isEmpty())
+        if (!text.isEmpty() && DEBUG)
             System.out.println(text);
     }
 
     private static void read(int P2, int length, boolean binary) throws CardException {
         String text;
-        System.out.println("Reading " + length + " words at 0x" + Integer.toHexString(P2));
+        if (DEBUG)
+            System.out.println("Reading " + length + " words at 0x" + Integer.toHexString(P2));
         ResponseAPDU r = channel.transmit(new CommandAPDU(0x80, 0xBE, 00, P2, length));
-        System.out.println("SW : " + Integer.toHexString(r.getSW()));
+        if (DEBUG)
+            System.out.println("SW : " + Integer.toHexString(r.getSW()));
         if (binary)
             text = toBString(r.getData());
         else
             text = toString(r.getData());
-        if (!text.isEmpty())
+        if (!text.isEmpty() && DEBUG)
             System.out.println(text);
     }
 
     private static void getMode() throws CardException {
         String text;
         ResponseAPDU r = channel.transmit(new CommandAPDU(0x80, 0xBE, 00, 0x04, 0x04));
-        System.out.println("SW : " + Integer.toHexString(r.getSW()));
+        if (DEBUG)
+            System.out.println("SW : " + Integer.toHexString(r.getSW()));
         text = toBString(r.getData()).substring(27, 29);
         switch (text) {
             case "01":
-                System.out.println("Issuer mode.");
+                if (DEBUG)
+                    System.out.println("Issuer mode.");
                 break;
             case "10":
-                System.out.println("User mode.");
+                if (DEBUG)
+                    System.out.println("User mode.");
                 break;
             default:
-                System.out.println("Bricked card.");
+                if (DEBUG)
+                    System.out.println("Bricked card.");
                 break;
         }
     }
 
     private static void getACA() throws CardException {
-        System.out.println("Getting ACA.");
+        if (DEBUG)
+            System.out.println("Getting ACA.");
         String text;
         ResponseAPDU r = channel.transmit(new CommandAPDU(0x80, 0xBE, 00, 0x05, 0x04));
-        System.out.println("SW : " + Integer.toHexString(r.getSW()));
+        if (DEBUG)
+            System.out.println("SW : " + Integer.toHexString(r.getSW()));
         text = toBString(r.getData()).substring(27, 35);
-        System.out.println("ACA : " + text);
+        if (DEBUG)
+            System.out.println("ACA : " + text);
     }
 
     private static void verify(int P2, byte[] PIN) throws CardException {
-        System.out.println("Verifying PIN " + toString(PIN) + " at 0x" + Integer.toHexString(P2));
+        if (DEBUG)
+            System.out.println("Verifying PIN " + toString(PIN) + " at 0x" + Integer.toHexString(P2));
         ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, 0x20, 0x00, P2, PIN, 0x04));
-        System.out.println("SW : " + Integer.toHexString(r.getSW()));
+        if (DEBUG)
+            System.out.println("SW : " + Integer.toHexString(r.getSW()));
         String text = toString(r.getData());
-        if (!text.isEmpty())
+        if (!text.isEmpty() && DEBUG)
             System.out.println(text);
 
-        r = channel.transmit(new CommandAPDU(0x80, 0xBE, 0x00, 0x07, 0x04));
+        /*r = channel.transmit(new CommandAPDU(0x80, 0xBE, 0x00, 0x07, 0x04));
         switch (r.getData()[3]) {
             case -128:
                 System.out.println("3 tries left.");
@@ -141,7 +162,7 @@ public class SmartCard {
             default:
                 System.out.println("Card blocked.");
                 break;
-        }
+        }*/
     }
 
     private static void verify(int PIN) throws CardException {
@@ -159,11 +180,13 @@ public class SmartCard {
     }
 
     private static void update(int P2, byte[] data, int length) throws CardException {
-        System.out.println("Writing " + toString(data) + " at 0x" + Integer.toHexString(P2));
+        if (DEBUG)
+            System.out.println("Writing " + toString(data) + " at 0x" + Integer.toHexString(P2));
         ResponseAPDU r = channel.transmit(new CommandAPDU(0x80, 0xDE, 0x00, P2, data, 0x00, length));
-        System.out.println("SW : " + Integer.toHexString(r.getSW()));
+        if (DEBUG)
+            System.out.println("SW : " + Integer.toHexString(r.getSW()));
         String text = toString(r.getData());
-        if (!text.isEmpty())
+        if (!text.isEmpty() && DEBUG)
             System.out.println(text);
     }
 
@@ -172,20 +195,24 @@ public class SmartCard {
     }
 
     private static void emulateUserMode() throws CardException {
-        System.out.println("Emulating User Mode");
+        if (DEBUG)
+            System.out.println("Emulating User Mode");
         ResponseAPDU r = channel.transmit(new CommandAPDU(0x00, 0x20, 0x00, 0x3A, hexFromString("AAAAAAAA"), 0x04));
-        System.out.println("SW : " + Integer.toHexString(r.getSW()));
+        if (DEBUG)
+            System.out.println("SW : " + Integer.toHexString(r.getSW()));
         String text = toString(r.getData());
-        if (!text.isEmpty())
+        if (!text.isEmpty() && DEBUG)
             System.out.println(text);
     }
 
     private static void userMode() throws CardException {
-        System.out.println("Changing to User Mode");
+        if (DEBUG)
+            System.out.println("Changing to User Mode");
         ResponseAPDU r = channel.transmit(new CommandAPDU(0x80, 0xDE, 0x10, 0x04, hexFromString("00000080"), 0x04));
-        System.out.println("SW : " + Integer.toHexString(r.getSW()));
+        if (DEBUG)
+            System.out.println("SW : " + Integer.toHexString(r.getSW()));
         String text = toString(r.getData());
-        if (!text.isEmpty())
+        if (!text.isEmpty() && DEBUG)
             System.out.println(text);
     }
 
@@ -200,12 +227,16 @@ public class SmartCard {
         update(P2, psk, 32);
     }
 
-    public static void getDataWithPIN(String PIN) throws CardException {
-        String hPIN = "";
+    private static void getDataWithPIN(String PIN) throws CardException {
+        String hPIN = "", data;
         for (char c : PIN.toCharArray())
             hPIN += "0" + c;
         verify(P2_CSC1, hexFromString(hPIN));
-        String data = toStringPSK(getCardID()) + "," + toStringPSK(channel.transmit(new CommandAPDU(0x80, 0xBE, 0x00, 0x10, 32)).getData());
+        ResponseAPDU r = channel.transmit(new CommandAPDU(0x80, 0xBE, 0x00, 0x10, 32));
+        if (r.getSW() == 0x9000)
+            data = toStringPSK(getCardID()) + "," + toStringPSK(r.getData());
+        else
+            data = "-1,-1";
 
         System.out.println(data);
     }
@@ -236,26 +267,29 @@ public class SmartCard {
         update(0x38, hexFromString(hPIN), 4);
     }
 
-    public static void main(String[] args) throws CardException {
+    private static boolean checkPINFormat(String PIN) {
+        if (PIN.length() != 4)
+            return false;
+        for (char c : PIN.toCharArray())
+            if (!Character.isDigit(c))
+                return false;
+        return true;
+    }
+
+    public static void getIDAndDataWithPIN(String PIN) throws CardException {
+        if (!checkPINFormat(PIN)) {
+            System.out.println("-1,-1");
+            return;
+        }
         CardTerminal terminal = SmartCard.getTerminals().get(0);
-        System.out.println("READER : " + terminal.toString());
+        if (DEBUG)
+            System.out.println("READER : " + terminal.toString());
         Card card = terminal.connect("T=0");
-        System.out.println("ATR : " + toString(card.getATR().getBytes()));
+        if (DEBUG)
+            System.out.println("ATR : " + toString(card.getATR().getBytes()));
         channel = card.getBasicChannel();
 
-        getDataWithPIN("2409");
-
-        /*verify(0);
-        setPIN("2409");
-        writeID(new Random().nextInt());
-        read(0x01, 4);
-        writePSK(0x10, generatePSK());*/
-
-        /*verify(0);
-        userMode();*/
-
-        /*verify(0);
-        update(0x05, hexFromString("00000022"), 0x04);*/
+        getDataWithPIN(PIN);
 
         card.disconnect(true);
     }
