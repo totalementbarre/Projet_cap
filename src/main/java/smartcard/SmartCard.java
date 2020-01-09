@@ -2,11 +2,10 @@ package smartcard;
 
 import javax.smartcardio.*;
 import javax.xml.bind.DatatypeConverter;
+import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Random;
 
-/**
- * @author Guillaume
- */
 public class SmartCard {
     private static final int P2_CSC0 = 0x07;
     private static final int P2_CSC1 = 0x39;
@@ -18,16 +17,16 @@ public class SmartCard {
 
     private static CardChannel channel;
 
-    static public List<CardTerminal> getTerminals() throws CardException {
+    private static List<CardTerminal> getTerminals() throws CardException {
         return TerminalFactory.getDefault().terminals().list();
     }
 
-    static public String toString(byte[] byteTab) {
+    private static String toString(byte[] byteTab) {
         String text = "";
         String hexNumber;
         int i;
         for (i = 0; i < byteTab.length; i++) {
-            hexNumber = Integer.toHexString(byteTab[i]);
+            hexNumber = Integer.toHexString(0xFF & byteTab[i]);
             if (hexNumber.length() == 1)
                 text += " 0" + hexNumber;
             else
@@ -36,7 +35,21 @@ public class SmartCard {
         return text;
     }
 
-    static public String toBString(byte[] byteTab) {
+    private static String toStringPSK(byte[] byteTab) {
+        String text = "";
+        String hexNumber;
+        int i;
+        for (i = 0; i < byteTab.length; i++) {
+            hexNumber = Integer.toHexString(0xFF & byteTab[i]);
+            if (hexNumber.length() == 1)
+                text += "0" + hexNumber;
+            else
+                text += "" + hexNumber;
+        }
+        return text;
+    }
+
+    private static String toBString(byte[] byteTab) {
         String text = "";
         String hexNumber;
         int i, j;
@@ -111,7 +124,7 @@ public class SmartCard {
         if (!text.isEmpty())
             System.out.println(text);
 
-        r = channel.transmit(new CommandAPDU(0x80, 0xBE, 00, 0x07, 0x04));
+        r = channel.transmit(new CommandAPDU(0x80, 0xBE, 0x00, 0x07, 0x04));
         switch (r.getData()[3]) {
             case -128:
                 System.out.println("3 tries left.");
@@ -176,10 +189,51 @@ public class SmartCard {
             System.out.println(text);
     }
 
+    private static byte[] generatePSK() {
+        Random r = new Random();
+        byte[] tab = new byte[32];
+        r.nextBytes(tab);
+        return tab;
+    }
+
+    private static void writePSK(int P2, byte[] psk) throws CardException {
+        update(P2, psk, 32);
+    }
+
+    public static void getDataWithPIN(String PIN) throws CardException {
+        String hPIN = "";
+        for (char c : PIN.toCharArray())
+            hPIN += "0" + c;
+        verify(P2_CSC1, hexFromString(hPIN));
+        String data = toStringPSK(getCardID()) + "," + toStringPSK(channel.transmit(new CommandAPDU(0x80, 0xBE, 0x00, 0x10, 32)).getData());
+
+        System.out.println(data);
+    }
+
+    private static byte[] getCardID() throws CardException {
+        return channel.transmit(new CommandAPDU(0x80, 0xBE, 0x00, 0x01, 4)).getData();
+    }
+
+    private static void writeID(int ID) throws CardException {
+        update(0x01, ByteBuffer.allocate(4).putInt(ID).array(), 4);
+    }
+
     private static Card resetCard(Card card) throws CardException {
         card.disconnect(true);
         CardTerminal terminal = SmartCard.getTerminals().get(0);
         return terminal.connect("T=0");
+    }
+
+    private static void writeACA() throws CardException {
+        update(0x05, hexFromString("00000022"), 0x04);
+    }
+
+    private static void setPIN(String PIN) throws CardException {
+        String hPIN = "";
+        for (char c : PIN.toCharArray())
+            hPIN += "0" + c;
+
+        update(0x38, hexFromString(hPIN), 4);
     }
 
     public static void main(String[] args) throws CardException {
@@ -189,19 +243,20 @@ public class SmartCard {
         System.out.println("ATR : " + toString(card.getATR().getBytes()));
         channel = card.getBasicChannel();
 
-//        verify(0);
-//        read(0x04, 04, true);
-        getACA();
-        verify(0);
-        update(0x05, hexFromString("00000022"), 0x04);
+        getDataWithPIN("2409");
 
-        card = resetCard(card);
-        channel = card.getBasicChannel();
+        /*verify(0);
+        setPIN("2409");
+        writeID(new Random().nextInt());
+        read(0x01, 4);
+        writePSK(0x10, generatePSK());*/
 
-        getACA();
+        /*verify(0);
+        userMode();*/
 
-        read(0x10, 0x04);
-        read(0x28, 0x04);
+        /*verify(0);
+        update(0x05, hexFromString("00000022"), 0x04);*/
+
         card.disconnect(true);
     }
 }
