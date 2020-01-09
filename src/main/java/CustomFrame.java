@@ -4,32 +4,24 @@ import java.awt.*;
 
 public class CustomFrame extends JFrame {
     private JPanel contentPane;
-    private ImageProcessing imageProcessing;
+    private ImageProcessingOpti imageProcessing;
+
     public CustomFrame() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setBounds(0, 0, ImageProcessing.IMG_WIDTH, ImageProcessing.IMG_HEIGHT);
+        setBounds(0, 0, ImageProcessingOpti.IMG_WIDTH, ImageProcessingOpti.IMG_HEIGHT);
         contentPane = new JPanel();
         contentPane.setBorder(new EmptyBorder(0, 0, 0, 0));
         setContentPane(contentPane);
         contentPane.setLayout(null);
-        imageProcessing = new ImageProcessing();
+        imageProcessing = new ImageProcessingOpti();
         new MyThread().start();
-
-
-
     }
-
-
-
-
 
     public void paint(Graphics g) {
         g = contentPane.getGraphics();
         //capture camera
-
-
-
         g.drawImage(imageProcessing.processing(), 0, 0, this);
+
     }
 
     class MyThread extends Thread {
@@ -38,7 +30,7 @@ public class CustomFrame extends JFrame {
             for (; ; ) {
                 repaint();
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(1);
                 } catch (InterruptedException e) {
                 }
             }
