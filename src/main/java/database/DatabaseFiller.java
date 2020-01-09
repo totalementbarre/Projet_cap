@@ -21,8 +21,7 @@ public class DatabaseFiller {
 
 
         String hashedPassword = hashPassword(selX, selY, password);
-        UserInfos sebInfo = new UserInfos("seb", hashedPassword, 1, null, selX, selY);
-
+        UserInfos sebInfo = new UserInfos("seb", hashedPassword, "f32b7c00", null, selX, selY);
         Transaction transaction = session.beginTransaction();
         session.persist(sebInfo);
         transaction.commit();

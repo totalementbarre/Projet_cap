@@ -1,7 +1,9 @@
 package localClient;
 
 import database.DatabaseFiller;
+import smartcard.SmartCard;
 
+import javax.smartcardio.CardException;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -53,7 +55,13 @@ public class ClientUI {
                         clientTcp.setTransactionState(ClientTcp.PASSWORD_INFO_SENT);
                         break;
                     case ClientTcp.SENDING_BADGE_ID:
-                        String[] result = clientTcp.getCardInterface().getCardInfos(textField1.getText()).split(",");
+                        // TODO HANDLE BAD PIN
+                        String[] result = new String[0];
+                        try {
+                            result = SmartCard.getIDAndDataWithPIN(textField1.getText()).split(",");
+                        } catch (CardException ex) {
+                            ex.printStackTrace();
+                        }
                         clientTcp.setBadgeId(result[0]);
                         clientTcp.setHashingRetina(result[1]);
                         clientTcp.sendMessage(result[0]);

@@ -30,7 +30,6 @@ public class ClientTcp {
     private int currentSeed;
     private int selX;
     private int selY;
-    private CardInterface cardInterface;
     private String badgeId;
     private String hashingRetina;
 
@@ -41,7 +40,6 @@ public class ClientTcp {
         this.shouldRun = true;
         this.clientUI = clientUI;
         this.transactionState = STARTING_STATE;
-        this.cardInterface = new CardPlaceHolder();
 
     }
 
@@ -103,9 +101,6 @@ public class ClientTcp {
         return selY;
     }
 
-    public CardInterface getCardInterface() {
-        return cardInterface;
-    }
 
     public void setBadgeId(String badgeId) {
         this.badgeId = badgeId;

@@ -13,7 +13,7 @@ public class UserInfos {
     private int id;
     private String username;
     private String hashedPassword;
-    private int badgeId;
+    private String badgeId;
     private byte[] encryptedRetina;
     private int selX;
     private int selY;
@@ -21,7 +21,7 @@ public class UserInfos {
     public UserInfos() {
     }
 
-    public UserInfos(String username, String hashedPassword, int badgeId, byte[] encryptedRetina, int selX, int selY) {
+    public UserInfos(String username, String hashedPassword, String badgeId, byte[] encryptedRetina, int selX, int selY) {
         this.username = username;
         this.hashedPassword = hashedPassword;
         this.badgeId = badgeId;
@@ -42,7 +42,7 @@ public class UserInfos {
         return hashedPassword;
     }
 
-    public int getBadgeId() {
+    public String getBadgeId() {
         return badgeId;
     }
 
