@@ -23,6 +23,8 @@ public class ImageProcessingOpti {
     public static final double SEUIL_HOUGH_DETECTION = 300;
     public static final double PAS_HOUGH_ANGLE = 1;
 
+    public static final double DELTA_FEATURE_COMPARAISON = 10;
+
     public static final int REDUCE_FACTOR = 2;
     public static final int IMG_WIDTH_REDUCED = 1280 / REDUCE_FACTOR;
     public static final int IMG_HEIGHT_REDUCED = 720 / REDUCE_FACTOR;
@@ -169,7 +171,8 @@ public class ImageProcessingOpti {
             finalResultFrame.paint(videoCapFrame.getGraphics(), mat_img);
 
            if (!this.ueEye1.isEmpty()) {
-                System.out.println(eyeFeatureExtractor());
+                //System.out.println(eyeFeatureExtractor());
+                System.out.println(featureComparator(computeMedian(this.ueEye1),computeMedian(this.saturationEye1),computeMedian(this.ueEye2),computeMedian(this.saturationEye2),(float)0.46875,(float)0.12857144,(float)0.44444445,(float)0.12195122));
             }
 
             //substractor(sourceImg,mask,1600);
@@ -216,6 +219,18 @@ public class ImageProcessingOpti {
 
         }
         return imgToPlot;
+    }
+
+    public boolean featureComparator(float u1,float s1,float u2,float s2,float DBu1,float DBs1,float DBu2,float DBs2){
+        double du1,du2,ds1,ds2;
+        du1 = pow(u1-DBu1,2);
+        du2 =pow(s1-DBs1,2);
+        ds1=pow(u2-DBu2,2);
+        ds2 =pow(s2-DBs2,2);
+
+        double ecartFeature = sqrt(du1 +du2 + ds1+ds2);
+        //System.out.println(ecartFeature);
+        return ecartFeature<DELTA_FEATURE_COMPARAISON;
     }
 
     String eyeFeatureExtractor() {
