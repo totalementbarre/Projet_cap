@@ -28,7 +28,7 @@ public class DatabaseFiller {
         int selX = 2;
         int selY = 3;
         String password = "token";
-        String retinaPrint = "0.6031746,0.17105263,0.5833333,0.15789473";
+        String retinaPrint = "0.38888887,0.118421055,0.23333335,0.12280702";
         String cryptedRetina = DatabaseFiller.encrypt(retinaPrint, "5bf858cbf491b3d40ae5973005982cf5a5274f4fb17417a14bbd532e59155f08");
 
         // TODO ADD X AND Y TO HASH

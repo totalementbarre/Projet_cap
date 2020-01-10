@@ -11,7 +11,7 @@ public class DisplayFrame extends JFrame {
     private JPanel contentPane;
 
     public DisplayFrame() throws HeadlessException {
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setBounds(0, 0, ImageProcessingOpti.IMG_WIDTH, ImageProcessingOpti.IMG_HEIGHT);
         contentPane = new JPanel();
         contentPane.setBorder(new EmptyBorder(0, 0, 0, 0));

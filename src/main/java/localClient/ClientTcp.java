@@ -188,6 +188,8 @@ public class ClientTcp {
 
                                 if (receivedString.equals("match")) {
                                     transactionState = AUTHENTICATED;
+                                    imageProcessingOpti.closeWindows();
+                                    imageProcessingOpti = null;
                                 }
                                 break;
                             case AUTHENTICATED :

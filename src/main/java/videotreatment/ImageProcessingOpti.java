@@ -5,6 +5,7 @@ import org.opencv.video.BackgroundSubtractor;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -169,10 +170,10 @@ public class ImageProcessingOpti {
             extractHistogram(sourceImg, listEyes);
             finalResultFrame.paint(videoCapFrame.getGraphics(), mat_img);
 
-           if (!this.ueEye1.isEmpty()) {
+            if (!this.ueEye1.isEmpty()) {
                 //System.out.println(eyeFeatureExtractor());
-               retinaFeatures = eyeFeatureExtractor();
-                System.out.println(featureComparator(computeMedian(this.ueEye1),computeMedian(this.saturationEye1),computeMedian(this.ueEye2),computeMedian(this.saturationEye2),(float)0.22222221,(float)0.14754099,(float)0.23333335,(float)0.12658228));
+                retinaFeatures = eyeFeatureExtractor();
+                System.out.println(featureComparator(computeMedian(this.ueEye1), computeMedian(this.saturationEye1), computeMedian(this.ueEye2), computeMedian(this.saturationEye2), (float) 0.22222221, (float) 0.14754099, (float) 0.23333335, (float) 0.12658228));
             }
 
             //substractor(sourceImg,mask,1600);
@@ -221,22 +222,22 @@ public class ImageProcessingOpti {
         return retinaFeatures;
     }
 
-    public static boolean featureComparator(float u1,float s1,float u2,float s2,float DBu1,float DBs1,float DBu2,float DBs2){
-        double du1,du2,ds1,ds2;
+    public static boolean featureComparator(float u1, float s1, float u2, float s2, float DBu1, float DBs1, float DBu2, float DBs2) {
+        double du1, du2, ds1, ds2;
         /*
         du1 = pow(u1-DBu1,2);
         du2 =pow(s1-DBs1,2);
         ds1=pow(u2-DBu2,2);
         ds2 =pow(s2-DBs2,2);
         */
-        du1 = abs(u1-DBu1);
-        du2 =abs(s1-DBs1);
-        ds1=abs(u2-DBu2);
-        ds2 =abs(s2-DBs2);
+        du1 = abs(u1 - DBu1);
+        du2 = abs(s1 - DBs1);
+        ds1 = abs(u2 - DBu2);
+        ds2 = abs(s2 - DBs2);
 
-        double ecartFeature = (du1 +du2 + ds1+ds2);
+        double ecartFeature = (du1 + du2 + ds1 + ds2);
         System.out.println(ecartFeature);
-        return ecartFeature<DELTA_FEATURE_COMPARAISON;
+        return ecartFeature < DELTA_FEATURE_COMPARAISON;
     }
 
     String eyeFeatureExtractor() {
@@ -655,6 +656,11 @@ public class ImageProcessingOpti {
         }
         final BufferedImage img1 = img;
         return img;
+    }
+
+    public void closeWindows() {
+        this.finalResultFrame.dispatchEvent(new WindowEvent(this.finalResultFrame, WindowEvent.WINDOW_CLOSING));
+        this.videoCapFrame.dispatchEvent(new WindowEvent(this.videoCapFrame, WindowEvent.WINDOW_CLOSING));
     }
 
 }
