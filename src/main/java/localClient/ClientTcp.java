@@ -1,6 +1,5 @@
 package localClient;
 
-import database.DatabaseFiller;
 import videotreatment.ImageProcessingOpti;
 
 import java.io.BufferedReader;
@@ -18,7 +17,8 @@ public class ClientTcp {
     public static final int SENDING_BADGE_ID = 3;
     public static final int BADGE_INFO_SENT = 4;
     public static final int SENDING_RETINA_HASH_KEY = 5;
-    public static final int WAITING_FINAL_RESPONSE = 6;
+    public static final int SENDING_RETINA = 6;
+    public static final int AUTHENTICATED = 7;
 
 
     private Socket socket;
@@ -35,8 +35,9 @@ public class ClientTcp {
     private int selX;
     private int selY;
     private String badgeId;
-    private String hashingRetina;
+    private String hashingKeyRetina;
     private boolean isRetinaValidated;
+    private boolean counterStarted;
 
     public ClientTcp(ClientUI clientUI) {
         this.portNumber = 5000;
@@ -45,6 +46,7 @@ public class ClientTcp {
         this.shouldRun = true;
         this.clientUI = clientUI;
         this.transactionState = STARTING_STATE;
+        this.counterStarted = false;
     }
 
     public Boolean connection() {
@@ -110,12 +112,12 @@ public class ClientTcp {
         this.badgeId = badgeId;
     }
 
-    public void setHashingRetina(String hashingRetina) {
-        this.hashingRetina = hashingRetina;
+    public void setHashingKeyRetina(String hashingKeyRetina) {
+        this.hashingKeyRetina = hashingKeyRetina;
     }
 
-    public String getHashingRetina() {
-        return hashingRetina;
+    public String getHashingKeyRetina() {
+        return hashingKeyRetina;
     }
 
     public void setRetinaValidated(boolean retinaValidated) {
@@ -133,6 +135,8 @@ public class ClientTcp {
 
         @Override
         public void run() {
+            long startingTime = 0;
+            ImageProcessingOpti imageProcessingOpti = null;
             while (clientTcp.getShouldRun()) {
                 if (clientTcp.getConnected()) {
                     String receivedString;
@@ -140,33 +144,55 @@ public class ClientTcp {
                         receivedString = clientTcp.getInputStream().readLine();
 //                        clientUI.getReceivedTextArea().setText("");
                         clientUI.getReceivedTextArea().append(receivedString + "\n");
-                        if (transactionState == USERNAME_ENTERED) {
-                            String[] result = receivedString.split(",");
-                            selX = Integer.parseInt(result[0]);
-                            selY = Integer.parseInt(result[1]);
-                            currentSeed = Integer.parseInt(result[2]);
-                        } else if (transactionState == PASSWORD_INFO_SENT) {
-                            if (receivedString.equals("correct")) {
-                                transactionState = SENDING_BADGE_ID;
-                            } else {
-                                transactionState = STARTING_STATE;
-                            }
-                        } else if (transactionState == BADGE_INFO_SENT) {
-                            if (receivedString.equals("correct pin")) {
-                                transactionState = SENDING_RETINA_HASH_KEY;
-                                long startingTime = (new Date()).getTime();
-                                ImageProcessingOpti imageProcessingOpti = new ImageProcessingOpti();
-                                isRetinaValidated = false;
-                                while (((new Date()).getTime() - startingTime < 60000) || isRetinaValidated) {
-                                    outputStream.println(imageProcessingOpti.processing());
+
+                        switch (transactionState) {
+                            case USERNAME_ENTERED:
+                                String[] result = receivedString.split(",");
+                                selX = Integer.parseInt(result[0]);
+                                selY = Integer.parseInt(result[1]);
+                                currentSeed = Integer.parseInt(result[2]);
+                                counterStarted = false;
+                                break;
+                            case PASSWORD_INFO_SENT:
+                                if (receivedString.equals("correct")) {
+                                    transactionState = SENDING_BADGE_ID;
+                                } else {
+                                    transactionState = STARTING_STATE;
                                 }
+                                break;
+                            case BADGE_INFO_SENT:
+                                if (receivedString.equals("correct pin")) {
+                                    outputStream.println(hashingKeyRetina);
+                                    transactionState = SENDING_RETINA;
+                                } else {
+                                    transactionState = STARTING_STATE;
+                                }
+                                break;
 
-                            } else {
-                                transactionState = STARTING_STATE;
-                            }
+                            case SENDING_RETINA:
+                                if (!counterStarted) {
+                                    startingTime = (new Date()).getTime();
+                                    counterStarted = true;
+                                    imageProcessingOpti = new ImageProcessingOpti();
 
+                                }
+                                String retinaFeatures = null;
+                                retinaFeatures = imageProcessingOpti.processing();
+                                if (retinaFeatures != null)
+                                    outputStream.println(retinaFeatures);
+
+
+                                if ((new Date()).getTime() - startingTime < 20000)
+                                    transactionState = STARTING_STATE;
+
+                                if (receivedString.equals("match")) {
+                                    transactionState = AUTHENTICATED;
+                                }
+                                break;
+                            case AUTHENTICATED :
+                                System.out.println("YOU HAVE BEEN AUTHENTICATED !");
+                                break;
                         }
-
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

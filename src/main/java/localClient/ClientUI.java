@@ -63,13 +63,9 @@ public class ClientUI {
                             ex.printStackTrace();
                         }
                         clientTcp.setBadgeId(result[0]);
-                        clientTcp.setHashingRetina(result[1]);
+                        clientTcp.setHashingKeyRetina(result[1]);
                         clientTcp.sendMessage(result[0]);
                         clientTcp.setTransactionState(ClientTcp.BADGE_INFO_SENT);
-                        break;
-                    case ClientTcp.SENDING_RETINA_HASH_KEY:
-                        clientTcp.sendMessage(clientTcp.getHashingRetina());
-                        clientTcp.setTransactionState(ClientTcp.WAITING_FINAL_RESPONSE);
                         break;
                 }
             }

@@ -1,9 +1,11 @@
 package server;
 
 import database.DBConnection;
+import database.DatabaseFiller;
 import database.UserInfos;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import videotreatment.ImageProcessingOpti;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -36,6 +38,7 @@ public class TCPServer {
     public static final int PASSWORD_INFO_SENT = 2;
     public static final int RECEIVING_BADGE_ID = 3;
     public static final int RECEIVING_RETINA_HASH_KEY = 4;
+    private static final int RECEIVING_RETINA_FEATURES = 5;
 
 
     //initialize socket and input stream
@@ -131,6 +134,7 @@ public class TCPServer {
 
             String line;
             UserInfos userInfos = null;
+            String retinaInfos = null;
             int currentSeed = (new Random()).nextInt(1000);
 
             while (true) {
@@ -218,6 +222,29 @@ public class TCPServer {
                             break;
                         case RECEIVING_RETINA_HASH_KEY:
                             // TODO FILL
+                            line = inputStream.readLine();
+                            System.out.println(ANSI_CYAN + "Received encryption key : " + line + ANSI_RESET);
+                            retinaInfos = DatabaseFiller.decrypt(userInfos.getEncryptedRetina(), line);
+                            transactionState = RECEIVING_RETINA_FEATURES;
+                            break;
+                        case RECEIVING_RETINA_FEATURES:
+                            line = inputStream.readLine();
+                            String[] result = line.split(",");
+                            String[] userRetinaStrings = retinaInfos.split(",");
+                            if(ImageProcessingOpti.featureComparator(
+                                    Integer.parseInt(result[0]),
+                                    Integer.parseInt(result[1]),
+                                    Integer.parseInt(result[2]),
+                                    Integer.parseInt(result[3]),
+                                    Integer.parseInt(userRetinaStrings[0]),
+                                    Integer.parseInt(userRetinaStrings[1]),
+                                    Integer.parseInt(userRetinaStrings[2]),
+                                    Integer.parseInt(userRetinaStrings[3]))){
+                                outputStream.println("match");
+                            }
+                            else{
+                                outputStream.println("does not match");
+                            }
                             break;
                         default:
                             System.err.println("Wrong value for transaction sate");

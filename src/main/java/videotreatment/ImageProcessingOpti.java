@@ -221,7 +221,7 @@ public class ImageProcessingOpti {
         return retinaFeatures;
     }
 
-    public boolean featureComparator(float u1,float s1,float u2,float s2,float DBu1,float DBs1,float DBu2,float DBs2){
+    public static boolean featureComparator(float u1,float s1,float u2,float s2,float DBu1,float DBs1,float DBu2,float DBs2){
         double du1,du2,ds1,ds2;
         /*
         du1 = pow(u1-DBu1,2);
