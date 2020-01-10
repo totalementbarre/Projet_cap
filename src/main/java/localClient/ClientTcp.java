@@ -41,7 +41,7 @@ public class ClientTcp {
 
     public ClientTcp(ClientUI clientUI) {
         this.portNumber = 5000;
-        this.address = "localhost";
+        this.address = "192.168.43.153";
         this.isConnected = false;
         this.shouldRun = true;
         this.clientUI = clientUI;
@@ -180,7 +180,8 @@ public class ClientTcp {
                                 retinaFeatures = imageProcessingOpti.processing();
                                 if (retinaFeatures != null)
                                     outputStream.println(retinaFeatures);
-
+                                else
+                                    outputStream.println("-1,-1,-1,-1");
 
                                 if ((new Date()).getTime() - startingTime < 20000)
                                     transactionState = STARTING_STATE;
