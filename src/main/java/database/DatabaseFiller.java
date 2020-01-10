@@ -18,6 +18,7 @@ import java.util.Base64;
 
 public class DatabaseFiller {
     private static String salt = "itsasecret";
+
     public static void main(String[] args) {
         // TODO see https://howtodoinjava.com/security/java-aes-encryption-example/ for cipher
 
@@ -27,11 +28,14 @@ public class DatabaseFiller {
         int selX = 2;
         int selY = 3;
         String password = "token";
+        String retinaPrint = "0.6031746,0.17105263,0.5833333,0.15789473";
+        String cryptedRetina = DatabaseFiller.encrypt(retinaPrint, "5bf858cbf491b3d40ae5973005982cf5a5274f4fb17417a14bbd532e59155f08");
+
         // TODO ADD X AND Y TO HASH
 
 
         String hashedPassword = hashPassword(selX, selY, password);
-        UserInfos sebInfo = new UserInfos("seb", hashedPassword, "f32b7c00", null, selX, selY);
+        UserInfos sebInfo = new UserInfos("seb", hashedPassword, "f32b7c00", cryptedRetina, selX, selY);
         Transaction transaction = session.beginTransaction();
         session.persist(sebInfo);
         transaction.commit();
@@ -84,7 +88,7 @@ public class DatabaseFiller {
             IvParameterSpec ivspec = new IvParameterSpec(iv);
 
             SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-            KeySpec spec = new PBEKeySpec(key.toCharArray(),salt.getBytes(), 65536, 256);
+            KeySpec spec = new PBEKeySpec(key.toCharArray(), salt.getBytes(), 65536, 256);
             SecretKey tmp = factory.generateSecret(spec);
             SecretKeySpec secretKey = new SecretKeySpec(tmp.getEncoded(), "AES");
 
@@ -109,7 +113,7 @@ public class DatabaseFiller {
 
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
             cipher.init(Cipher.DECRYPT_MODE, secretKey, ivspec);
-            return new String (cipher.doFinal(Base64.getDecoder().decode(strToDecrypt)));
+            return new String(cipher.doFinal(Base64.getDecoder().decode(strToDecrypt)));
         } catch (Exception e) {
             e.printStackTrace();
         }

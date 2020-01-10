@@ -1,11 +1,15 @@
 package localClient;
 
+import database.DatabaseFiller;
+import videotreatment.ImageProcessingOpti;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Date;
 
 public class ClientTcp {
     public static final int STARTING_STATE = 0;
@@ -32,6 +36,7 @@ public class ClientTcp {
     private int selY;
     private String badgeId;
     private String hashingRetina;
+    private boolean isRetinaValidated;
 
     public ClientTcp(ClientUI clientUI) {
         this.portNumber = 5000;
@@ -40,7 +45,6 @@ public class ClientTcp {
         this.shouldRun = true;
         this.clientUI = clientUI;
         this.transactionState = STARTING_STATE;
-
     }
 
     public Boolean connection() {
@@ -114,6 +118,10 @@ public class ClientTcp {
         return hashingRetina;
     }
 
+    public void setRetinaValidated(boolean retinaValidated) {
+        isRetinaValidated = retinaValidated;
+    }
+
     private class ListenerRunnable implements Runnable {
         private ClientUI clientUI;
         private ClientTcp clientTcp;
@@ -146,6 +154,13 @@ public class ClientTcp {
                         } else if (transactionState == BADGE_INFO_SENT) {
                             if (receivedString.equals("correct pin")) {
                                 transactionState = SENDING_RETINA_HASH_KEY;
+                                long startingTime = (new Date()).getTime();
+                                ImageProcessingOpti imageProcessingOpti = new ImageProcessingOpti();
+                                isRetinaValidated = false;
+                                while (((new Date()).getTime() - startingTime < 60000) || isRetinaValidated) {
+                                    outputStream.println(imageProcessingOpti.processing());
+                                }
+
                             } else {
                                 transactionState = STARTING_STATE;
                             }
