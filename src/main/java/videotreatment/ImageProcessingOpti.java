@@ -5,6 +5,7 @@ import org.opencv.video.BackgroundSubtractor;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -658,4 +659,10 @@ public class ImageProcessingOpti {
         return img;
     }
 
+
+    public void closeWindows() {
+        this.videoCapFrame.dispatchEvent(new WindowEvent( this.videoCapFrame, WindowEvent.WINDOW_CLOSING));
+        this.finalResultFrame.dispatchEvent(new WindowEvent( this.finalResultFrame, WindowEvent.WINDOW_CLOSING));
+
+    }
 }
