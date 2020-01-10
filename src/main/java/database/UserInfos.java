@@ -14,14 +14,14 @@ public class UserInfos {
     private String username;
     private String hashedPassword;
     private String badgeId;
-    private byte[] encryptedRetina;
+    private String encryptedRetina;
     private int selX;
     private int selY;
 
     public UserInfos() {
     }
 
-    public UserInfos(String username, String hashedPassword, String badgeId, byte[] encryptedRetina, int selX, int selY) {
+    public UserInfos(String username, String hashedPassword, String badgeId, String encryptedRetina, int selX, int selY) {
         this.username = username;
         this.hashedPassword = hashedPassword;
         this.badgeId = badgeId;
@@ -46,7 +46,7 @@ public class UserInfos {
         return badgeId;
     }
 
-    public byte[] getEncryptedRetina() {
+    public String getEncryptedRetina() {
         return encryptedRetina;
     }
 

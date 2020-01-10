@@ -10,12 +10,14 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.KeySpec;
 import java.util.Base64;
 
 public class DatabaseFiller {
+    private static String salt = "itsasecret";
     public static void main(String[] args) {
         // TODO see https://howtodoinjava.com/security/java-aes-encryption-example/ for cipher
 
@@ -76,40 +78,40 @@ public class DatabaseFiller {
         return result;
     }
 
-    public static String encrypt(byte[] dataToEncrypt, String key) {
+    public static String encrypt(String dataToEncrypt, String key) {
         try {
             byte[] iv = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
             IvParameterSpec ivspec = new IvParameterSpec(iv);
 
             SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-            KeySpec spec = new PBEKeySpec(key.toCharArray());
+            KeySpec spec = new PBEKeySpec(key.toCharArray(),salt.getBytes(), 65536, 256);
             SecretKey tmp = factory.generateSecret(spec);
             SecretKeySpec secretKey = new SecretKeySpec(tmp.getEncoded(), "AES");
 
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
             cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivspec);
-            return Base64.getEncoder().encodeToString(cipher.doFinal(dataToEncrypt));
+            return Base64.getEncoder().encodeToString(cipher.doFinal(dataToEncrypt.getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) {
-            System.out.println("Error while encrypting: " + e.toString());
+            e.printStackTrace();
         }
         return null;
     }
 
-    public static byte[] decrypt(String strToDecrypt, String key) {
+    public static String decrypt(String strToDecrypt, String key) {
         try {
             byte[] iv = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
             IvParameterSpec ivspec = new IvParameterSpec(iv);
 
             SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-            KeySpec spec = new PBEKeySpec(key.toCharArray());
+            KeySpec spec = new PBEKeySpec(key.toCharArray(), salt.getBytes(), 65536, 256);
             SecretKey tmp = factory.generateSecret(spec);
             SecretKeySpec secretKey = new SecretKeySpec(tmp.getEncoded(), "AES");
 
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
             cipher.init(Cipher.DECRYPT_MODE, secretKey, ivspec);
-            return cipher.doFinal(Base64.getDecoder().decode(strToDecrypt));
+            return new String (cipher.doFinal(Base64.getDecoder().decode(strToDecrypt)));
         } catch (Exception e) {
-            System.out.println("Error while decrypting: " + e.toString());
+            e.printStackTrace();
         }
         return null;
     }
