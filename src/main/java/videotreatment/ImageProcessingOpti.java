@@ -150,8 +150,9 @@ public class ImageProcessingOpti {
 
     }
 
-    public BufferedImage processing() {
+    public String processing() {
         Date date = new Date();
+        String retinaFeatures = null;
         //System.out.println("loop");
         long startingTime = date.getTime();
 //        sourceImg = videoCap.getOneFrame();
@@ -170,6 +171,7 @@ public class ImageProcessingOpti {
 
            if (!this.ueEye1.isEmpty()) {
                 //System.out.println(eyeFeatureExtractor());
+               retinaFeatures = eyeFeatureExtractor();
                 System.out.println(featureComparator(computeMedian(this.ueEye1),computeMedian(this.saturationEye1),computeMedian(this.ueEye2),computeMedian(this.saturationEye2),(float)0.22222221,(float)0.14754099,(float)0.23333335,(float)0.12658228));
             }
 
@@ -216,7 +218,7 @@ public class ImageProcessingOpti {
 
 
         }
-        return imgToPlot;
+        return retinaFeatures;
     }
 
     public boolean featureComparator(float u1,float s1,float u2,float s2,float DBu1,float DBs1,float DBu2,float DBs2){
