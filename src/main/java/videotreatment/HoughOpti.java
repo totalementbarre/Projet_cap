@@ -1,5 +1,6 @@
+package videotreatment;
+
 import java.util.ArrayList;
-import java.util.List;
 
 public class HoughOpti {
     private double col_centre;
@@ -144,7 +145,7 @@ public class HoughOpti {
                             /*
                             for (int x = dc-MARGE; x < dc+MARGE; x++) {
                                 for (int y = dl - MARGE; y < dl+MARGE; y++) {
-                                    if(x>=0 && x <ImageProcessingOpti.IMG_WIDTH_REDUCED &&y>=0 && y<ImageProcessingOpti.IMG_HEIGHT_REDUCED) out[x][y]++;
+                                    if(x>=0 && x <videotreatment.ImageProcessingOpti.IMG_WIDTH_REDUCED &&y>=0 && y<videotreatment.ImageProcessingOpti.IMG_HEIGHT_REDUCED) out[x][y]++;
 
                                 }
                             }

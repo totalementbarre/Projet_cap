@@ -1,3 +1,4 @@
+package videotreatment;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;

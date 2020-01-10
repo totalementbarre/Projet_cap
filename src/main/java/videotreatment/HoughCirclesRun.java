@@ -1,6 +1,6 @@
-
+package videotreatment;
 /**
- * @file HoughCircles.java
+ * @file videotreatment.HoughCircles.java
  * @brief This program demonstrates circle finding with the Hough transform
  */
 

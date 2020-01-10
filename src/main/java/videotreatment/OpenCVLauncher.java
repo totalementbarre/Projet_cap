@@ -1,3 +1,5 @@
+package videotreatment;
+
 import java.awt.*;
 
 public class OpenCVLauncher {

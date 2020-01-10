@@ -1,21 +1,19 @@
+package videotreatment;
+
 import org.opencv.core.Mat;
 import org.opencv.video.BackgroundSubtractor;
-import org.opencv.video.Video;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 import static java.lang.StrictMath.*;
 import static org.opencv.core.CvType.CV_32F;
-import static org.opencv.core.CvType.CV_8UC3;
 
 public class ImageProcessingOpti {
     public static final int IMG_WIDTH = 1280;
@@ -29,7 +27,7 @@ public class ImageProcessingOpti {
     public static final int IMG_WIDTH_REDUCED = 1280 / REDUCE_FACTOR;
     public static final int IMG_HEIGHT_REDUCED = 720 / REDUCE_FACTOR;
 
-    private static final int NUMBER_OF_FRAME_KEPT = 50;
+    private static final int NUMBER_OF_FRAME_KEPT = 20;
 
     private DisplayFrame videoCapFrame;
     private DisplayFrame finalResultFrame;
@@ -139,8 +137,8 @@ public class ImageProcessingOpti {
 
 
         h.PatternCreation(temp_grad_norm, temp_grad_angle, beta);
-        //for (ArrayList<HoughOpti.Beta> i : beta)
-        //for (HoughOpti.Beta b : i)
+        //for (ArrayList<videotreatment.HoughOpti.Beta> i : beta)
+        //for (videotreatment.HoughOpti.Beta b : i)
         //b.affichage();
 
 
@@ -172,7 +170,7 @@ public class ImageProcessingOpti {
 
            if (!this.ueEye1.isEmpty()) {
                 //System.out.println(eyeFeatureExtractor());
-                System.out.println(featureComparator(computeMedian(this.ueEye1),computeMedian(this.saturationEye1),computeMedian(this.ueEye2),computeMedian(this.saturationEye2),(float)0.46875,(float)0.12857144,(float)0.44444445,(float)0.12195122));
+                System.out.println(featureComparator(computeMedian(this.ueEye1),computeMedian(this.saturationEye1),computeMedian(this.ueEye2),computeMedian(this.saturationEye2),(float)0.22222221,(float)0.14754099,(float)0.23333335,(float)0.12658228));
             }
 
             //substractor(sourceImg,mask,1600);
@@ -187,7 +185,7 @@ public class ImageProcessingOpti {
             //Mat maskfg = mask.clone();
             //substractor(mat_img,maskfg);
             //videoCapFrame.paint(videoCapFrame.getGraphics(), maskfg);
-            //sourceImg = Mat2Image.matToImage(maskfg);
+            //sourceImg = videotreatment.Mat2Image.matToImage(maskfg);
 //            // FIN DE SUSBSTRACTOR
 
 
@@ -223,13 +221,19 @@ public class ImageProcessingOpti {
 
     public boolean featureComparator(float u1,float s1,float u2,float s2,float DBu1,float DBs1,float DBu2,float DBs2){
         double du1,du2,ds1,ds2;
+        /*
         du1 = pow(u1-DBu1,2);
         du2 =pow(s1-DBs1,2);
         ds1=pow(u2-DBu2,2);
         ds2 =pow(s2-DBs2,2);
+        */
+        du1 = abs(u1-DBu1);
+        du2 =abs(s1-DBs1);
+        ds1=abs(u2-DBu2);
+        ds2 =abs(s2-DBs2);
 
-        double ecartFeature = sqrt(du1 +du2 + ds1+ds2);
-        //System.out.println(ecartFeature);
+        double ecartFeature = (du1 +du2 + ds1+ds2);
+        System.out.println(ecartFeature);
         return ecartFeature<DELTA_FEATURE_COMPARAISON;
     }
 

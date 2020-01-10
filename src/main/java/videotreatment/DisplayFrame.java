@@ -1,3 +1,5 @@
+package videotreatment;
+
 import org.opencv.core.Mat;
 
 import javax.swing.*;
