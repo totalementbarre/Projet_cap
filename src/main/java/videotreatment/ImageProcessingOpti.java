@@ -173,7 +173,7 @@ public class ImageProcessingOpti {
            if (!this.ueEye1.isEmpty()) {
                 //System.out.println(eyeFeatureExtractor());
                retinaFeatures = eyeFeatureExtractor();
-                //System.out.println(eyeFeatureExtractor());
+                System.out.println(eyeFeatureExtractor());
                System.out.println(featureComparator(computeMedian(this.ueEye1),computeMedian(this.saturationEye1),computeMedian(this.ueEye2),computeMedian(this.saturationEye2),(float)0.05952381,(float)0.18421052,(float)0.058823526,(float)0.21794872));
             }
 
@@ -237,7 +237,7 @@ public class ImageProcessingOpti {
         ds2 =abs(s2-DBs2);
 
         double ecartFeature =   ds1+ds2+du1+du2;
-        System.out.println(ecartFeature);
+        //System.out.println(ecartFeature);
         return ecartFeature<DELTA_FEATURE_COMPARAISON;
     }
 
