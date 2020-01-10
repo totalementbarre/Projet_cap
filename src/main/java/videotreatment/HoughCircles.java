@@ -3,6 +3,7 @@ package videotreatment;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import static java.lang.StrictMath.abs;
+import static org.opencv.core.Core.BORDER_DEFAULT;
 import static org.opencv.imgproc.Imgproc.*;
 
 public class HoughCircles {
@@ -33,11 +35,12 @@ public class HoughCircles {
 
         Mat gray = image.clone();
         cvtColor(image, gray, COLOR_BGR2GRAY);
-        medianBlur(gray, gray, 3);
+        //medianBlur(gray, gray, 3);
+        blur(gray, gray,new Size(1,1),new Point(-1,-1), BORDER_DEFAULT);
         Mat circles = new Mat();
         Imgproc.HoughCircles(gray, circles, Imgproc.HOUGH_GRADIENT, 1,
-                50, // change this value to detect circles with different distances to each other
-                100.0, 22, 5, 25); // change the last two parameters
+                30, // change this value to detect circles with different distances to each other
+                65, 23, 14, 30); // change the last two parameters
         // (min_radius & max_radius) to detect larger circles
 
 
@@ -55,7 +58,7 @@ public class HoughCircles {
         //List<Eyes> listEyes = new ArrayList<>();
 
 
-        double radius_tolerance = 2;
+        double radius_tolerance = 3;
         for (int i = 0; i < circles.cols(); i++) {
             for (int j = 0; j <circles.cols() ; j++) {
                 if(Math.abs(centers[i][2]-centers[j][2])<radius_tolerance)
@@ -75,12 +78,12 @@ public class HoughCircles {
         }
         listEyes.sort(new EyesComparator());
 
-        double ideal_ratio = 10.3;
+        double ideal_ratio = 11.5;
 
 
         for (Eyes eyes : listEyes){
-            if(abs(eyes.ratio-ideal_ratio)<5){
-                if(abs(eyes.y1-eyes.y2)<70 && eyes.x1<eyes.x2){
+            if(abs(eyes.ratio-ideal_ratio)<2){
+                if(abs(eyes.y1-eyes.y2)<50 && eyes.x1<eyes.x2){
 
                     //System.out.println(eyes.ratio);
                     Point center1 = new Point(Math.round(eyes.x1), Math.round(eyes.y1));
