@@ -225,6 +225,7 @@ public class TCPServer {
                             line = inputStream.readLine();
                             System.out.println(ANSI_CYAN + "Received encryption key : " + line + ANSI_RESET);
                             retinaInfos = DatabaseFiller.decrypt(userInfos.getEncryptedRetina(), line);
+                            outputStream.println("ok");
                             transactionState = RECEIVING_RETINA_FEATURES;
                             break;
                         case RECEIVING_RETINA_FEATURES:
@@ -232,14 +233,14 @@ public class TCPServer {
                             String[] result = line.split(",");
                             String[] userRetinaStrings = retinaInfos.split(",");
                             if(ImageProcessingOpti.featureComparator(
-                                    Integer.parseInt(result[0]),
-                                    Integer.parseInt(result[1]),
-                                    Integer.parseInt(result[2]),
-                                    Integer.parseInt(result[3]),
-                                    Integer.parseInt(userRetinaStrings[0]),
-                                    Integer.parseInt(userRetinaStrings[1]),
-                                    Integer.parseInt(userRetinaStrings[2]),
-                                    Integer.parseInt(userRetinaStrings[3]))){
+                                    Float.parseFloat(result[0]),
+                                    Float.parseFloat(result[1]),
+                                    Float.parseFloat(result[2]),
+                                    Float.parseFloat(result[3]),
+                                    Float.parseFloat(userRetinaStrings[0]),
+                                    Float.parseFloat(userRetinaStrings[1]),
+                                    Float.parseFloat(userRetinaStrings[2]),
+                                    Float.parseFloat(userRetinaStrings[3]))){
                                 outputStream.println("match");
                             }
                             else{
