@@ -43,6 +43,18 @@ public class HoughCircles {
                 65, 23, 14, 30); // change the last two parameters
         // (min_radius & max_radius) to detect larger circles
 
+        /*
+         Mat gray = image.clone();
+        cvtColor(image, gray, COLOR_BGR2GRAY);
+        medianBlur(gray, gray, 5);
+        Mat circles = new Mat();
+        Imgproc.HoughCircles(gray, circles, Imgproc.HOUGH_GRADIENT, 1.0,
+                (double)gray.rows()/30, // change this value to detect circles with different distances to each other
+                100.0, 20.0, 5, 30); // change the last two parameters
+        // (min_radius & max_radius) to d
+
+
+         */
 
         float[][] centers = new float[circles.cols()][3];
 
