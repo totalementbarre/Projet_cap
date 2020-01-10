@@ -183,9 +183,10 @@ public class ClientTcp {
                                 else
                                     outputStream.println("-1,-1,-1,-1");
 
-                                if ((new Date()).getTime() - startingTime < 20000)
+                                if ((new Date()).getTime() - startingTime > 20000) {
                                     transactionState = STARTING_STATE;
-
+                                    imageProcessingOpti.closeWindows();
+                                }
                                 if (receivedString.equals("match")) {
                                     transactionState = AUTHENTICATED;
                                     imageProcessingOpti.closeWindows();

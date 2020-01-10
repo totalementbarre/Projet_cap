@@ -32,7 +32,7 @@ public class ImageProcessingOpti {
 
     private DisplayFrame videoCapFrame;
     private DisplayFrame finalResultFrame;
-
+    private DisplayFrame gradFrame;
 
     private VideoCap videoCap;
 
@@ -95,6 +95,7 @@ public class ImageProcessingOpti {
         //HoughTemplateCreation();
         videoCapFrame = new DisplayFrame();
         finalResultFrame = new DisplayFrame();
+        gradFrame = new DisplayFrame();
 
         Thread t1 = new Thread(videoCap);
         t1.start();
